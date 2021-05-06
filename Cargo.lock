@@ -199,6 +199,13 @@ dependencies = [
 
 [[package]]
 name = "image"
+version = "0.1.0"
+dependencies = [
+ "image 0.23.14",
+]
+
+[[package]]
+name = "image"
 version = "0.23.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "24ffcb7e7244a9bf19d35bf2883b9c080c4ced3c07a9895572178cdb8f13f6a1"
@@ -225,6 +232,10 @@ dependencies = [
  "autocfg",
  "hashbrown",
 ]
+
+[[package]]
+name = "interpret"
+version = "0.1.0"
 
 [[package]]
 name = "jpeg-decoder"
@@ -337,18 +348,9 @@ name = "piet"
 version = "0.1.0"
 dependencies = [
  "clap",
- "image",
- "piet-interpreter",
- "piet-io",
+ "image 0.1.0",
+ "interpret",
 ]
-
-[[package]]
-name = "piet-interpreter"
-version = "0.1.0"
-
-[[package]]
-name = "piet-io"
-version = "0.1.0"
 
 [[package]]
 name = "png"

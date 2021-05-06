@@ -1,5 +1,5 @@
 [package]
-name = "piet-interpreter"
+name = "interpret"
 version = "0.1.0"
 edition = "2018"
 
