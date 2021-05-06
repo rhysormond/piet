@@ -227,10 +227,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "interpreter"
-version = "0.1.0"
-
-[[package]]
 name = "jpeg-decoder"
 version = "0.1.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -342,8 +338,17 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "image",
- "interpreter",
+ "piet-interpreter",
+ "piet-io",
 ]
+
+[[package]]
+name = "piet-interpreter"
+version = "0.1.0"
+
+[[package]]
+name = "piet-io"
+version = "0.1.0"
 
 [[package]]
 name = "png"
