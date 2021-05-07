@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-image = { version = "0.1.0", path = "image" }
+parse = { version = "0.1.0", path = "parse" }
 interpret = { version = "0.1.0", path = "interpret" }
 clap = "3.0.0-beta.2"
 
 [workspace]
-members = ["image", "interpret"]
+members = ["parse", "interpret"]
 
