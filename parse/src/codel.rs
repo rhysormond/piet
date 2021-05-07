@@ -1,4 +1,4 @@
-use image::{Rgba, Pixel};
+use image::{Pixel, Rgba};
 
 const HUE_CYCLE_SIZE: u8 = 3;
 const LIGHTNESS_CYCLE_SIZE: u8 = 6;

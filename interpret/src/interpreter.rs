@@ -1,6 +1,8 @@
-use crate::util::{PointerDirection, ChooserDirection};
-use parse::program::Program;
 use std::vec::Vec;
+
+use parse::program::Program;
+
+use crate::util::{ChooserDirection, PointerDirection};
 
 pub struct Interpreter {
     pointer_x: u32,
@@ -19,7 +21,7 @@ impl Interpreter {
             pointer_direction: PointerDirection::Right,
             chooser_direction: ChooserDirection::Left,
             stack: Vec::new(),
-            program
+            program,
         }
     }
 

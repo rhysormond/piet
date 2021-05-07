@@ -1,7 +1,9 @@
 extern crate image;
 
 use std::collections::HashMap;
+
 use image::GenericImageView;
+
 use crate::codel::Codel;
 
 #[derive(Debug)]
@@ -17,14 +19,14 @@ impl Program {
 
         let (width, height) = img.dimensions();
 
-        let codels: HashMap<(u32, u32), Codel> = img.pixels().into_iter().map( | (x, y, color) | {
+        let codels: HashMap<(u32, u32), Codel> = img.pixels().into_iter().map(|(x, y, color)| {
             ((x, y), Codel::from(color))
         }).collect();
 
         Program {
             codels,
             width,
-            height
+            height,
         }
     }
 }

@@ -1,6 +1,7 @@
 use clap::Clap;
-use parse::program::Program;
+
 use interpret::interpreter::Interpreter;
+use parse::program::Program;
 
 #[derive(Clap)]
 struct Opts {
