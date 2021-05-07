@@ -3,13 +3,27 @@ use image::{Pixel, Rgba};
 const HUE_CYCLE_SIZE: u8 = 3;
 const LIGHTNESS_CYCLE_SIZE: u8 = 6;
 
-/// Hue cycle:
-/// - red -> yellow -> green -> cyan -> blue -> magenta -> red
-/// -  0  ->  1     ->  2    ->  3   ->  4   ->  5      ->  0
+/// A Piet program is composed of a grid of Codels.
 ///
-/// Lightness cycle:
-/// - light -> normal -> dark -> light
-/// -  0    ->  1     ->  2   -> 0
+/// Codels are one of black, white, or one of 18 different colors.
+/// Codel colors are on a cyclic, 2d gradient of hue and lightness.
+///
+/// | hue/lightness | red     | yellow  | green   | cyan    | blue    | magenta |
+/// |---------------|---------|---------|---------|---------|---------|---------|
+/// | light         | #FFC0C0 | #FFFFC0 | #C0FFC0 | #C0FFFF | #C0C0FF | #FFC0FF |
+/// | neutral       | #FF0000 | #FFFF00 | #00FF00 | #00FFFF | #0000FF | #FF00FF |
+/// | dark          | #C00000 | #C0C000 | #00C000 | #00C0C0 | #0000C0 | #C000C0 |
+/// along with black (`#000000`) and white (`#FFFFFF`)
+///
+/// The hue cycle is:
+/// - red -> yellow -> green -> cyan -> blue -> magenta -> red
+/// Which is represented internally as:
+/// - 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 0
+///
+/// The lightness cycle is:
+/// - light -> neutral -> dark -> light
+/// Which is represented internally as:
+/// - 0 -> 1 -> 2 -> 0
 #[derive(Debug)]
 pub enum Codel {
     Color { hue: u8, lightness: u8 },
@@ -18,20 +32,19 @@ pub enum Codel {
 }
 
 impl Codel {
-    /// Compares the hue or lightness change between
-    fn compare_cyclic_values(current: &u8, next: &u8, cycle_size: &u8) -> u8 {
-        // This is implemented with a checked_sub to avoid converting to/from i8 here
+    /// Returns the distance between two values along a directed cycle.
+    fn cyclic_distance(current: &u8, next: &u8, cycle_size: &u8) -> u8 {
         let change = next.checked_sub(*current);
         change.unwrap_or_else(|| cycle_size - (current - next))
     }
 
-    /// Returns (HueChange, LightnessChange)
+    /// Returns compares two Codels' hues and lightnesses and returns a tuple of (hueChange, lightnessChange)
     pub fn compare(&self, next: &Codel) -> Option<(u8, u8)> {
         match (self, next) {
             (Codel::Color { hue, lightness }, Codel::Color { hue: next_hue, lightness: next_lightness }) => {
                 Some((
-                    Codel::compare_cyclic_values(hue, next_hue, &HUE_CYCLE_SIZE),
-                    Codel::compare_cyclic_values(lightness, next_lightness, &LIGHTNESS_CYCLE_SIZE)
+                    Codel::cyclic_distance(hue, next_hue, &HUE_CYCLE_SIZE),
+                    Codel::cyclic_distance(lightness, next_lightness, &LIGHTNESS_CYCLE_SIZE)
                 ))
             }
             _ => None,
@@ -72,18 +85,18 @@ mod test_codel {
     use super::*;
 
     #[test]
-    fn test_compare_cyclic_values_identical() {
-        assert_eq!(Codel::compare_cyclic_values(&0, &0, &3), 0);
+    fn test_cyclic_distance_identical() {
+        assert_eq!(Codel::cyclic_distance(&0, &0, &3), 0);
     }
 
     #[test]
-    fn test_compare_cyclic_values_different() {
-        assert_eq!(Codel::compare_cyclic_values(&0, &1, &3), 1);
+    fn test_cyclic_distance_different() {
+        assert_eq!(Codel::cyclic_distance(&0, &1, &3), 1);
     }
 
     #[test]
-    fn test_compare_cyclic_values_cycled() {
-        assert_eq!(Codel::compare_cyclic_values(&1, &0, &3), 2);
+    fn test_cyclic_distance_cycled() {
+        assert_eq!(Codel::cyclic_distance(&1, &0, &3), 2);
     }
 
     #[test]

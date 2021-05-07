@@ -4,6 +4,16 @@ use parse::program::Program;
 
 use crate::util::{ChooserDirection, PointerDirection};
 
+/// An interpreter for a Piet program.
+///
+/// # Parameters
+///
+/// * `pointer_x` - The x coordinate of the direction pointer.
+/// * `pointer_y` - The y coordinate of the direction pointer.
+/// * `pointer_direction` - The direction of the direction pointer.
+/// * `chooser_direction` - The direction of the direction chooser.
+/// * `stack` - The stack for storing data values.
+/// * `program` - The program being run by the interpreter.
 pub struct Interpreter {
     pointer_x: u32,
     pointer_y: u32,
@@ -14,6 +24,7 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
+    /// Initializes the interpreter with a program.
     pub fn new(program: Program) -> Self {
         Interpreter {
             pointer_x: 0,
@@ -25,7 +36,6 @@ impl Interpreter {
         }
     }
 
-    pub fn run(&mut self) -> () {
-
-    }
+    /// Runs the interpreter until completion.
+    pub fn run(&mut self) -> () {}
 }

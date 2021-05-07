@@ -6,6 +6,7 @@ use image::GenericImageView;
 
 use crate::codel::Codel;
 
+/// A Piet program is represented as a 2d grid of Codels.
 #[derive(Debug)]
 pub struct Program {
     codels: HashMap<(u32, u32), Codel>,
@@ -14,6 +15,7 @@ pub struct Program {
 }
 
 impl Program {
+    /// Loads a program from a file given its path.
     pub fn load(path: &str) -> Program {
         let img = image::open(path).unwrap();
 
