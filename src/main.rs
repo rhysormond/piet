@@ -1,5 +1,6 @@
 use clap::Clap;
 use parse::program::Program;
+use interpret::interpreter::Interpreter;
 
 #[derive(Clap)]
 struct Opts {
@@ -8,5 +9,7 @@ struct Opts {
 
 fn main() {
     let opts: Opts = Opts::parse();
-    Program::load(&opts.file);
+    let program = Program::load(&opts.file);
+    let mut interpreter = Interpreter::new(program);
+    interpreter.run();
 }

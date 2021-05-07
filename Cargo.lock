@@ -229,6 +229,9 @@ dependencies = [
 [[package]]
 name = "interpret"
 version = "0.1.0"
+dependencies = [
+ "parse",
+]
 
 [[package]]
 name = "jpeg-decoder"
