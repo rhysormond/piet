@@ -1,1 +1,1 @@
-A [piet](https://esolangs.org/wiki/Piet) interpreter
+A [piet](https://www.dangermouse.net/esoteric/piet.html) interpreter
