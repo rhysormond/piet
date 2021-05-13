@@ -4,6 +4,7 @@ use parse::program::Program;
 
 use crate::state::State;
 use crate::direction::{ChooserDirection, PointerDirection};
+use crate::command::execute;
 
 /// An interpreter for a Piet program.
 ///
@@ -26,5 +27,15 @@ impl Interpreter {
     }
 
     /// Runs the interpreter until completion.
-    pub fn run(&mut self) -> () {}
+    pub fn run(&mut self) -> () {
+        self.advance();
+    }
+
+    /// Advance the program state by one iteration.
+    pub fn advance(&mut self) -> () {
+        let hue_change = todo!();
+        let lightness_change = todo!();
+        let last_region_size = todo!();
+        execute(&mut self.state, hue_change, lightness_change, last_region_size);
+    }
 }
