@@ -1,2 +1,3 @@
 pub mod interpreter;
-mod util;
+mod direction;
+mod state;
