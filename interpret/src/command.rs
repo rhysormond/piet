@@ -47,7 +47,7 @@ fn pop(state: &mut State) -> () {
 
 /// Pops the top two values off the stack, adds them, and pushes the result back on the stack.
 fn add(state: &mut State) -> () {
-    if state.stack.len() >=2 {
+    if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
         state.stack.push(one + two);
@@ -56,7 +56,7 @@ fn add(state: &mut State) -> () {
 
 /// Pops the top two values off the stack, calculates the second top value minus the top value, and pushes the result back on the stack.
 fn subtract(state: &mut State) -> () {
-    if state.stack.len() >=2 {
+    if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
         state.stack.push(two - one);
@@ -65,7 +65,7 @@ fn subtract(state: &mut State) -> () {
 
 /// Pops the top two values off the stack, multiplies them, and pushes the result back on the stack.
 fn multiply(state: &mut State) -> () {
-    if state.stack.len() >=2 {
+    if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
         state.stack.push(two * one);
@@ -75,7 +75,7 @@ fn multiply(state: &mut State) -> () {
 /// Pops the top two values off the stack, calculates the integer division of the second top value by the top value, and pushes the result back on the stack.
 /// If a divide by zero occurs, it is handled as an implementation-dependent error, though simply ignoring the command is recommended.
 fn divide(state: &mut State) -> () {
-    if state.stack.len() >=2 && state.stack.last().unwrap() != &0 {
+    if state.stack.len() >= 2 && state.stack.last().unwrap() != &0 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
         state.stack.push(two / one);
@@ -86,7 +86,7 @@ fn divide(state: &mut State) -> () {
 /// The result has the same sign as the divisor (the top value).
 /// If the top value is zero, this is a divide by zero error, which is handled as an implementation-dependent error, though simply ignoring the command is recommended.
 fn modulo(state: &mut State) -> () {
-    if state.stack.len() >=2 && state.stack.last().unwrap() != &0 {
+    if state.stack.len() >= 2 && state.stack.last().unwrap() != &0 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
         state.stack.push(two % one);
@@ -96,16 +96,16 @@ fn modulo(state: &mut State) -> () {
 /// Replaces the top value of the stack with 0 if it is non-zero, and 1 if it is zero.
 fn not(state: &mut State) -> () {
     if let Some(top) = state.stack.pop() {
-        state.stack.push(if top == 0 {1} else {0});
+        state.stack.push(if top == 0 { 1 } else { 0 });
     }
 }
 
 /// Pops the top two values off the stack, and pushes 1 on to the stack if the second top value is greater than the top value, and pushes 0 if it is not greater.
 fn greater(state: &mut State) -> () {
-    if state.stack.len() >=2 {
+    if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
-        state.stack.push(if two > one {1} else {0});
+        state.stack.push(if two > one { 1 } else { 0 });
     }
 }
 

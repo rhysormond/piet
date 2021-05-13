@@ -2,9 +2,9 @@ use std::vec::Vec;
 
 use parse::program::Program;
 
-use crate::state::State;
-use crate::direction::{ChooserDirection, PointerDirection};
 use crate::command::execute;
+use crate::direction::{ChooserDirection, PointerDirection};
+use crate::state::State;
 
 /// An interpreter for a Piet program.
 ///

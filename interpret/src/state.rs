@@ -1,4 +1,4 @@
-use crate::direction::{PointerDirection, ChooserDirection};
+use crate::direction::{ChooserDirection, PointerDirection};
 
 /// The state of a Piet program.
 ///
