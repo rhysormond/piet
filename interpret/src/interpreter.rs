@@ -15,11 +15,11 @@ use crate::util::{ChooserDirection, PointerDirection};
 /// * `stack` - The stack for storing data values.
 /// * `program` - The program being run by the interpreter.
 pub struct Interpreter {
-    pointer_x: u32,
-    pointer_y: u32,
+    pointer_x: usize,
+    pointer_y: usize,
     pointer_direction: PointerDirection,
     chooser_direction: ChooserDirection,
-    stack: Vec<u32>,
+    stack: Vec<usize>,
     program: Program,
 }
 

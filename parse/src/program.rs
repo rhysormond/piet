@@ -16,15 +16,18 @@ use crate::codel::Codel;
 #[derive(Debug)]
 pub struct Program {
     codels: Vec<Vec<Codel>>,
-    rows: u32,
-    cols: u32,
+    rows: usize,
+    cols: usize,
 }
 
 impl Program {
     /// Loads a program from a file given its path.
     pub fn load(path: &str) -> Program {
         let img = image::open(path).unwrap();
-        let (cols, rows) = img.dimensions();
+        let (cols, rows) = {
+            let (r_cols, r_rows) = img.dimensions();
+            (r_cols as usize, r_rows as usize)
+        };
         let codels: Vec<Vec<Codel>> = img
             .pixels()
             .chunks(cols as usize)
