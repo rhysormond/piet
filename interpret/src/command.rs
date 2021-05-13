@@ -8,7 +8,7 @@ use crate::state::State;
 /// | 1                    | push | subtract | modulo | pointer | roll      | out_number |
 /// | 2                    | pop  | multiply | not    | switch  | in_number | out_char   |
 ///
-///  Any operations which cannot be performed (such as popping values when not enough are on the stack) are simply ignored, and processing continues with the next command.
+/// Any operations which cannot be performed (such as popping values when not enough are on the stack) are simply ignored, and processing continues with the next command.
 pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, last_region_size: usize) -> () {
     match (hue_change, lightness_change) {
         (0, 0) => (),
@@ -37,65 +37,111 @@ pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, last_reg
 /// Pushes the value of the colour block just exited on to the stack.
 /// Note that values of colour blocks are not automatically pushed on to the stack - this push operation must be explicitly carried out.
 fn push(state: &mut State, last_region_size: usize) -> () {
-    state.stack.push(last_region_size);
+    state.stack.push(last_region_size as isize);
 }
 
 /// Pops the top value off the stack and discards it.
 fn pop(state: &mut State) -> () {
-    todo!()
+    state.stack.pop();
 }
 
 /// Pops the top two values off the stack, adds them, and pushes the result back on the stack.
 fn add(state: &mut State) -> () {
-    todo!()
+    if state.stack.len() >=2 {
+        let one = state.stack.pop().unwrap();
+        let two = state.stack.pop().unwrap();
+        state.stack.push(one + two);
+    }
 }
 
 /// Pops the top two values off the stack, calculates the second top value minus the top value, and pushes the result back on the stack.
 fn subtract(state: &mut State) -> () {
-    todo!()
+    if state.stack.len() >=2 {
+        let one = state.stack.pop().unwrap();
+        let two = state.stack.pop().unwrap();
+        state.stack.push(two - one);
+    }
 }
 
 /// Pops the top two values off the stack, multiplies them, and pushes the result back on the stack.
 fn multiply(state: &mut State) -> () {
-    todo!()
+    if state.stack.len() >=2 {
+        let one = state.stack.pop().unwrap();
+        let two = state.stack.pop().unwrap();
+        state.stack.push(two * one);
+    }
 }
 
 /// Pops the top two values off the stack, calculates the integer division of the second top value by the top value, and pushes the result back on the stack.
 /// If a divide by zero occurs, it is handled as an implementation-dependent error, though simply ignoring the command is recommended.
 fn divide(state: &mut State) -> () {
-    todo!()
+    if state.stack.len() >=2 && state.stack.last().unwrap() != &0 {
+        let one = state.stack.pop().unwrap();
+        let two = state.stack.pop().unwrap();
+        state.stack.push(two / one);
+    }
 }
 
 /// Pops the top two values off the stack, calculates the second top value modulo the top value, and pushes the result back on the stack.
 /// The result has the same sign as the divisor (the top value).
 /// If the top value is zero, this is a divide by zero error, which is handled as an implementation-dependent error, though simply ignoring the command is recommended.
 fn modulo(state: &mut State) -> () {
-    todo!()
+    if state.stack.len() >=2 && state.stack.last().unwrap() != &0 {
+        let one = state.stack.pop().unwrap();
+        let two = state.stack.pop().unwrap();
+        state.stack.push(two % one);
+    }
 }
 
 /// Replaces the top value of the stack with 0 if it is non-zero, and 1 if it is zero.
 fn not(state: &mut State) -> () {
-    todo!()
+    if let Some(top) = state.stack.pop() {
+        state.stack.push(if top == 0 {1} else {0});
+    }
 }
 
 /// Pops the top two values off the stack, and pushes 1 on to the stack if the second top value is greater than the top value, and pushes 0 if it is not greater.
 fn greater(state: &mut State) -> () {
-    todo!()
+    if state.stack.len() >=2 {
+        let one = state.stack.pop().unwrap();
+        let two = state.stack.pop().unwrap();
+        state.stack.push(if two > one {1} else {0});
+    }
 }
 
 /// Pops the top value off the stack and rotates the DP clockwise that many steps (anticlockwise if negative).
 fn pointer(state: &mut State) -> () {
-    todo!()
+    if let Some(top) = state.stack.pop() {
+        let clockwise_steps = {
+            let absolute_steps = top % 4;
+            if absolute_steps >= 0 {
+                absolute_steps
+            } else {
+                4 + absolute_steps
+            }
+        };
+        for _ in 0..clockwise_steps {
+            state.pointer_direction = state.pointer_direction.next();
+        }
+    }
 }
 
 /// Pops the top value off the stack and toggles the CC that many times (the absolute value of that many times if negative).
 fn switch(state: &mut State) -> () {
-    todo!()
+    if let Some(top) = state.stack.pop() {
+        let steps = (top % 2).abs();
+        for _ in 0..steps {
+            state.chooser_direction = state.chooser_direction.next();
+        }
+    }
 }
 
 /// Pushes a copy of the top value on the stack on to the stack.
 fn duplicate(state: &mut State) -> () {
-    todo!()
+    if let Some(top) = state.stack.pop() {
+        state.stack.push(top);
+        state.stack.push(top);
+    }
 }
 
 /// Pops the top two values off the stack and "rolls" the remaining stack entries to a depth equal to the second value popped, by a number of rolls equal to the first value popped.

@@ -15,7 +15,7 @@ pub struct State {
     pub(crate) pointer_y: usize,
     pub(crate) pointer_direction: PointerDirection,
     pub(crate) chooser_direction: ChooserDirection,
-    pub(crate) stack: Vec<usize>,
+    pub(crate) stack: Vec<isize>,
     pub(crate) termination_counter: u8,
 }
 
