@@ -1,7 +1,6 @@
 use parse::program::Program;
 
 use crate::command::execute;
-use crate::direction::{ChooserDirection, PointerDirection};
 use crate::state::State;
 
 /// An interpreter for a Piet program.

@@ -152,7 +152,39 @@ fn duplicate(state: &mut State) -> () {
 /// A negative depth is an error and the command is ignored.
 /// If a roll is greater than an implementation-dependent maximum stack depth, it is handled as an implementation-dependent error, though simply ignoring the command is recommended.
 fn roll(state: &mut State) -> () {
-    todo!()
+    let stack_size = state.stack.len();
+    let maybe_final_stack_size = stack_size.checked_sub(2);
+
+    // Only roll if:
+    //  - we actually have at least two elements to pop off the stack
+    //  - the roll depth is positive
+    //  - the roll depth is not greater than the stack size after popping off the top two elements
+    if let Some(final_stack_size) = maybe_final_stack_size {
+        // TODO: this is sloppy and full of redundant checks, it'll be easy to clean up after if let chains are added
+        state
+            .stack
+            .get(final_stack_size)
+            .and_then(|depth| usize::try_from(*depth).ok())
+            .and_then(|depth| if depth <= final_stack_size { Some(depth) } else { None })
+            .map(|depth|
+                {
+                    let turns = state.stack.pop().unwrap();
+                    let _depth = state.stack.pop().unwrap();
+
+                    if turns >= 0 {
+                        for _ in 0..turns {
+                            let top = state.stack.pop().unwrap();
+                            state.stack.insert(final_stack_size - depth, top);
+                        }
+                    } else {
+                        for _ in turns..0 {
+                            let bottom = state.stack.remove(final_stack_size - depth);
+                            state.stack.push(bottom);
+                        }
+                    }
+                }
+            );
+    }
 }
 
 /// Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack.
