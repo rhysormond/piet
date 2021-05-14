@@ -1,4 +1,5 @@
 /// Possible directions for the direction pointer.
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub(crate) enum PointerDirection {
     Up,
     Right,
@@ -18,6 +19,7 @@ impl PointerDirection {
 }
 
 /// Possible directions for the direction chooser.
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub(crate) enum ChooserDirection {
     Left,
     Right,
