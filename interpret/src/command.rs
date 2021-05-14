@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::state::State;
 
 ///	Selects a command based on the change in hue/lightness between two regions and executes it.
@@ -169,10 +171,18 @@ fn in_char(state: &mut State) -> () {
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
 fn out_number(state: &mut State) -> () {
-    todo!()
+    state
+        .stack
+        .pop()
+        .map(|top| print!("{}", top));
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
 fn out_char(state: &mut State) -> () {
-    todo!()
+    state
+        .stack
+        .pop()
+        .and_then(|top| u32::try_from(top).ok())
+        .and_then(|top| std::char::from_u32(top))
+        .map(|char| print!("{}", char));
 }

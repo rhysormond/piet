@@ -1,5 +1,3 @@
-use std::vec::Vec;
-
 use parse::program::Program;
 
 use crate::command::execute;
