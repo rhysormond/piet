@@ -26,6 +26,17 @@ pub struct Program {
 }
 
 impl Program {
+    pub fn new(codels: Vec<Vec<Codel>>, rows: usize, cols: usize) -> Program {
+        let regions = Self::get_regions(&codels, &rows, &cols);
+
+        Program {
+            regions,
+            codels,
+            rows,
+            cols,
+        }
+    }
+
     /// Loads a program from a file given its path.
     pub fn load(path: &str) -> Program {
         let img = image::open(path).unwrap();
@@ -40,14 +51,7 @@ impl Program {
             .map(|row| row.map(|(.., color)| Codel::from(color)).collect())
             .collect();
 
-        let regions = Self::get_regions(&codels, &rows, &cols);
-
-        Program {
-            regions,
-            codels,
-            rows,
-            cols,
-        }
+        Self::new(codels, rows, cols)
     }
 
     /// Builds a map of program coordinates to the sizes of their corresponding regions
@@ -151,5 +155,58 @@ impl Program {
     pub fn codel_at(&self, point: (usize, usize)) -> &Codel {
         let (row, col) = point;
         &self.codels[row][col]
+    }
+}
+
+#[cfg(test)]
+mod test_program {
+    use super::*;
+
+    #[test]
+    fn test_regions() {
+        let codels = vec![
+            vec![Codel::White, Codel::White, Codel::Black],
+            vec![Codel::White, Codel::Black, Codel::Black],
+            vec![Codel::White, Codel::Black, Codel::Black],
+        ];
+        let program = Program::new(codels, 3, 3);
+        let expected = vec![
+            ((0, 0), 4), ((0, 1), 4), ((0, 2), 5),
+            ((1, 0), 4), ((1, 1), 5), ((1, 2), 5),
+            ((2, 0), 4), ((2, 1), 5), ((2, 2), 5),
+        ];
+        assert_eq!(program.regions, expected.into_iter().collect());
+    }
+
+    #[test]
+    fn test_maybe_next_codel() {
+        let codels = vec![
+            vec![Codel::Color { hue: 0, lightness: 0 }, Codel::Color { hue: 0, lightness: 1 }, Codel::Color { hue: 0, lightness: 2 }],
+            vec![Codel::Color { hue: 1, lightness: 0 }, Codel::Color { hue: 1, lightness: 1 }, Codel::Color { hue: 1, lightness: 2 }],
+            vec![Codel::Color { hue: 2, lightness: 0 }, Codel::Color { hue: 2, lightness: 1 }, Codel::Color { hue: 2, lightness: 2 }],
+        ];
+        let program = Program::new(codels, 3, 3);
+
+        // corners
+        assert_eq!(program.maybe_next_codel((0, 0), ProgramDirection::Up), None);
+        assert_eq!(program.maybe_next_codel((0, 0), ProgramDirection::Left), None);
+        assert_eq!(program.maybe_next_codel((2, 2), ProgramDirection::Right), None);
+        assert_eq!(program.maybe_next_codel((2, 2), ProgramDirection::Down), None);
+
+        // corners
+        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Up), Some(((0, 1), &Codel::Color { hue: 0, lightness: 1 })));
+        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Left), Some(((1, 0), &Codel::Color { hue: 1, lightness: 0 })));
+        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Right), Some(((1, 2), &Codel::Color { hue: 1, lightness: 2 })));
+        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Down), Some(((2, 1), &Codel::Color { hue: 2, lightness: 1 })));
+    }
+
+    #[test]
+    fn test_codel_at() {
+        let codels = vec![
+            vec![Codel::White, Codel::White],
+            vec![Codel::White, Codel::Black]
+        ];
+        let program = Program::new(codels, 2, 2);
+        assert_eq!(program.codel_at((1, 1)), &Codel::Black);
     }
 }
