@@ -41,8 +41,7 @@ impl Interpreter {
                 if passed_white {
                     (0, 0)
                 } else {
-                    let (row, col) = self.state.pointer_location;
-                    let current_codel = &self.program.codels[row][col];
+                    let current_codel = &self.program.codel_at(self.state.pointer_location);
                     // TODO: The codels should both always be colors, tighten this guarantee
                     current_codel.compare(&next_codel).unwrap()
                 }
