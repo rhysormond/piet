@@ -11,8 +11,8 @@ use crate::state::State;
 /// | 2                    | pop  | multiply | not    | switch  | in_number | out_char   |
 ///
 /// Any operations which cannot be performed (such as popping values when not enough are on the stack) are simply ignored, and processing continues with the next command.
-pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, current_region_size: usize) -> () {
-    match (hue_change, lightness_change) {
+pub fn execute(state: &mut State, delta_hue: u8, delta_lightness: u8, current_region_size: usize) -> () {
+    match (delta_hue, delta_lightness) {
         (0, 0) => (),
         (0, 1) => push(state, current_region_size),
         (0, 2) => pop(state),
@@ -31,7 +31,7 @@ pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, current_
         (5, 0) => in_char(state),
         (5, 1) => out_number(state),
         (5, 2) => out_char(state),
-        (hue, lightness) => panic!("Unexpected hue ({}) / lightness ({}) change", hue, lightness),
+        _ => panic!("Unexpected hue ({}) / lightness ({}) change", delta_hue, delta_lightness),
     };
 }
 
