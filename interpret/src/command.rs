@@ -96,9 +96,9 @@ fn modulo(state: &mut State) -> () {
 
 /// Replaces the top value of the stack with 0 if it is non-zero, and 1 if it is zero.
 fn not(state: &mut State) -> () {
-    if let Some(top) = state.stack.pop() {
+    state.stack.pop().map( |top| {
         state.stack.push(if top == 0 { 1 } else { 0 });
-    }
+    });
 }
 
 /// Pops the top two values off the stack, and pushes 1 on to the stack if the second top value is greater than the top value, and pushes 0 if it is not greater.
@@ -112,7 +112,7 @@ fn greater(state: &mut State) -> () {
 
 /// Pops the top value off the stack and rotates the DP clockwise that many steps (anticlockwise if negative).
 fn pointer(state: &mut State) -> () {
-    if let Some(top) = state.stack.pop() {
+    state.stack.pop().map( |top| {
         let clockwise_steps = {
             let absolute_steps = top % 4;
             if absolute_steps >= 0 {
@@ -124,25 +124,25 @@ fn pointer(state: &mut State) -> () {
         for _ in 0..clockwise_steps {
             state.pointer_direction = state.pointer_direction.next();
         }
-    }
+    });
 }
 
 /// Pops the top value off the stack and toggles the CC that many times (the absolute value of that many times if negative).
 fn switch(state: &mut State) -> () {
-    if let Some(top) = state.stack.pop() {
+    state.stack.pop().map(|top| {
         let steps = (top % 2).abs();
         for _ in 0..steps {
             state.chooser_direction = state.chooser_direction.next();
         }
-    }
+    });
 }
 
 /// Pushes a copy of the top value on the stack on to the stack.
 fn duplicate(state: &mut State) -> () {
-    if let Some(top) = state.stack.pop() {
+    state.stack.pop().map(|top| {
         state.stack.push(top);
         state.stack.push(top);
-    }
+    });
 }
 
 /// Pops the top two values off the stack and "rolls" the remaining stack entries to a depth equal to the second value popped, by a number of rolls equal to the first value popped.
@@ -392,9 +392,9 @@ mod test_command {
         assert_eq!(wrapping_state.chooser_direction, initial_direction);
 
         let mut absolute_state = State::new(vec![]);
-        wrapping_state.stack.push(-3);
-        switch(&mut wrapping_state);
-        assert_eq!(wrapping_state.chooser_direction, initial_direction.next());
+        absolute_state.stack.push(-3);
+        switch(&mut absolute_state);
+        assert_eq!(absolute_state.chooser_direction, initial_direction.next());
     }
 
     #[test]
@@ -420,7 +420,6 @@ mod test_command {
         negative_turns_state.stack.append(&mut simple_stack.clone());
         negative_turns_state.stack.push(3); // depth
         negative_turns_state.stack.push(-2); // turns
-        let negative_turns_initial = negative_turns_state.stack.clone();
         roll(&mut negative_turns_state);
         assert_eq!(negative_turns_state.stack, vec![1, 2, 3, 6, 4, 5]);
 
