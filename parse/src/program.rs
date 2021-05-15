@@ -2,12 +2,12 @@ extern crate image;
 extern crate itertools;
 
 use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
 
 use image::GenericImageView;
 use itertools::Itertools;
 
 use crate::codel::Codel;
+use crate::direction::ProgramDirection;
 
 /// A Piet program is represented as a 2d grid of Codels.
 ///
@@ -15,10 +15,14 @@ use crate::codel::Codel;
 ///
 /// * `codels` - A collection of rows of Codels where `codels[0][0]` represents the top-left Codel.
 /// * `regions` - A map of coordinates to the size of their corresponding regions.
+/// * `rows` - The number of rows in the program.
+/// * `cols` - The number of cols in the program.
 #[derive(Debug)]
 pub struct Program {
-    codels: Vec<Vec<Codel>>,
-    regions: HashMap<(usize, usize), usize>,
+    pub codels: Vec<Vec<Codel>>,
+    pub regions: HashMap<(usize, usize), usize>,
+    rows: usize,
+    cols: usize,
 }
 
 impl Program {
@@ -41,6 +45,8 @@ impl Program {
         Program {
             regions,
             codels,
+            rows,
+            cols,
         }
     }
 
@@ -109,5 +115,41 @@ impl Program {
         neighbors.push((row + 1, col));
         neighbors.push((row, col + 1));
         neighbors
+    }
+
+    /// Gets the next codel along with its coordinates if one exists.
+    pub fn maybe_next_codel<T: Into<ProgramDirection>>(&self, start: (usize, usize), direction: T) -> Option<((usize, usize), &Codel)> {
+        let (row, col) = start;
+        let maybe_next = match direction.into() {
+            ProgramDirection::Up => row
+                .checked_sub(1)
+                .map(|next_row| (next_row, col)),
+            ProgramDirection::Down => {
+                let next_row = row + 1;
+                if next_row < self.rows {
+                    Some((next_row, col))
+                } else {
+                    None
+                }
+            }
+            ProgramDirection::Left => col
+                .checked_sub(1)
+                .map(|next_col| (row, next_col)),
+            ProgramDirection::Right => {
+                let next_col = col + 1;
+                if next_col < self.cols {
+                    Some((row, next_col))
+                } else {
+                    None
+                }
+            }
+        };
+        maybe_next.map(|next| (next, self.codel_at(next)))
+    }
+
+    /// Gets the codel at the specified (row, column) point.
+    pub fn codel_at(&self, point: (usize, usize)) -> &Codel {
+        let (row, col) = point;
+        &self.codels[row][col]
     }
 }
