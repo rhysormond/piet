@@ -37,11 +37,11 @@ impl Interpreter {
         if let Some((next_location, next_codel, passed_white)) = self.next_coordinates() {
             // If this is a region that we can move into, do it!
             let (delta_hue, delta_lightness) = {
+                let current_codel = &self.program.codel_at(self.state.pointer_location);
                 // If we passed through or are in a white region then we never execute a command
-                if passed_white {
+                if current_codel == &&Codel::White || passed_white {
                     (0, 0)
                 } else {
-                    let current_codel = &self.program.codel_at(self.state.pointer_location);
                     // TODO: The codels should both always be colors, tighten this guarantee
                     current_codel.compare(&next_codel).unwrap()
                 }
