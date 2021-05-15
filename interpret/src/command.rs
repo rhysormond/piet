@@ -11,10 +11,10 @@ use crate::state::State;
 /// | 2                    | pop  | multiply | not    | switch  | in_number | out_char   |
 ///
 /// Any operations which cannot be performed (such as popping values when not enough are on the stack) are simply ignored, and processing continues with the next command.
-pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, last_region_size: usize) -> () {
+pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, current_region_size: usize) -> () {
     match (hue_change, lightness_change) {
         (0, 0) => (),
-        (0, 1) => push(state, last_region_size),
+        (0, 1) => push(state, current_region_size),
         (0, 2) => pop(state),
         (1, 0) => add(state),
         (1, 1) => subtract(state),
@@ -32,14 +32,13 @@ pub fn execute(state: &mut State, hue_change: u8, lightness_change: u8, last_reg
         (5, 1) => out_number(state),
         (5, 2) => out_char(state),
         (hue, lightness) => panic!("Unexpected hue ({}) / lightness ({}) change", hue, lightness),
-    }
-    push(state, last_region_size);
+    };
 }
 
 /// Pushes the value of the colour block just exited on to the stack.
 /// Note that values of colour blocks are not automatically pushed on to the stack - this push operation must be explicitly carried out.
-fn push(state: &mut State, last_region_size: usize) -> () {
-    state.stack.push(last_region_size as isize);
+fn push(state: &mut State, current_region_size: usize) -> () {
+    state.stack.push(current_region_size as isize);
 }
 
 /// Pops the top value off the stack and discards it.
