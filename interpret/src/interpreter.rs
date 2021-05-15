@@ -54,6 +54,8 @@ impl Interpreter {
                 current_region_size,
             );
             self.state.pointer_location = next_location;
+            // Reset the termination counter if we've found a path forwards
+            self.state.termination_counter = 0;
         } else {
             // For even attempts, advance the pointer direction; otherwise alternate the chooser direction
             if self.state.termination_counter % 2 == 0 {
