@@ -37,7 +37,7 @@ impl Interpreter {
         if let Some((next_location, next_codel, passed_white)) = self.next_coordinates() {
             // If this is a region that we can move into, do it!
             let (delta_hue, delta_lightness) = {
-                // If we passed through a white region then we never execute a command
+                // If we passed through or are in a white region then we never execute a command
                 if passed_white {
                     (0, 0)
                 } else {
@@ -76,21 +76,29 @@ impl Interpreter {
     ///  - whether a white region was traversed
     /// TODO: the return type can be strengthened to Codel::Color without too much work
     fn next_coordinates(&self) -> Option<((usize, usize), &Codel, bool)> {
-        let first_edge = self.edge_coordinate(self.state.pointer_location.clone(), self.state.pointer_direction);
-        let second_edge = self.edge_coordinate(first_edge, self.state.pointer_direction.with_chooser(self.state.chooser_direction));
+        let first_edge = self.disjoint_edge_coordinate(self.state.pointer_location.clone(), self.state.pointer_direction);
+        let second_edge = self.disjoint_edge_coordinate(first_edge, self.state.pointer_direction.with_chooser(self.state.chooser_direction));
 
-        // Check if we're moving into a new codel or just off the edge of the program
-        // TODO: this could be trivially turned into a .map
+        // Check if we're moving into:
+        //  - either the edge of the program or a black codel in which case we stop
+        //  - a white codel in which case we:
+        //    - find and move to the first edge and then stop (even if there are other non-contiguous ones later)
+        //    - step into it if it's a colored codel, otherwise stay in the current white codel
+        //  - a colored codel in which case we step one square into it and stop
         if let Some((next_location, next_codel)) = self.program.maybe_next_codel(second_edge, self.state.pointer_direction) {
             match next_codel {
                 Codel::Black => None,
                 Codel::White => {
-                    // Find the first non-white codel in the same direction
+                    // Find the edge of the white region
                     let white_edge = self.edge_coordinate(next_location, self.state.pointer_direction);
-                    self
-                        .program
-                        .maybe_next_codel(white_edge, self.state.pointer_direction)
-                        .map(|(point, codel)| (point, codel, true))
+                    // If we're about to step into a colored codel, do it; otherwise, stop at the edge
+                    match self.program.maybe_next_codel(white_edge, self.state.pointer_direction) {
+                        // TODO: ideally this guard would be written to just ensure that this IS colored rather than NOT everything else
+                        Some((color_location, color_codel)) if color_codel != &Codel::White && color_codel != &Codel::Black => {
+                            Some((color_location, color_codel, true))
+                        },
+                        _ => Some((white_edge, &Codel::White, true)),
+                    }
                 }
                 _ => Some((next_location, next_codel, false)),
             }
@@ -99,7 +107,7 @@ impl Interpreter {
         }
     }
 
-    /// The coordinate of the first region edge (exclusive) reached starting from `start` and moving in `direction`.
+    /// The coordinate of the closest region edge (exclusive) reached starting from `start` and moving in `direction`.
     fn edge_coordinate(&self, start: (usize, usize), direction: PointerDirection) -> (usize, usize) {
         let codel = self.program.codel_at(start);
         let mut pointer = start;
@@ -113,5 +121,11 @@ impl Interpreter {
             }
         };
         pointer
+    }
+
+    /// The coordinate of the farthest region edge (exclusive) reached starting from `start` and moving in `direction`.
+    /// TODO: this needs to support disjoint regions, we can't just assume the first edge that we hit is the last one
+    fn disjoint_edge_coordinate(&self, start: (usize, usize), direction: PointerDirection) -> (usize, usize) {
+        self.edge_coordinate(start, direction)
     }
 }
