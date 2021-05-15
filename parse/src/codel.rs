@@ -1,7 +1,7 @@
 use image::{Pixel, Rgba};
 
-const HUE_CYCLE_SIZE: u8 = 3;
-const LIGHTNESS_CYCLE_SIZE: u8 = 6;
+const HUE_CYCLE_SIZE: u8 = 6;
+const LIGHTNESS_CYCLE_SIZE: u8 = 3;
 
 /// A Piet program is composed of a grid of Codels.
 ///
