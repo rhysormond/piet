@@ -9,6 +9,7 @@ use crate::direction::{ChooserDirection, PointerDirection};
 /// * `chooser_direction` - The direction of the direction chooser.
 /// * `stack` - The stack for storing data values.
 /// * `termination_counter` - The number of times that the program has failed to advance.
+/// * `stdin` - Any stdin piped to the program.
 #[derive(Debug)]
 pub struct State {
     pub(crate) pointer_location: (usize, usize),
@@ -16,16 +17,18 @@ pub struct State {
     pub(crate) chooser_direction: ChooserDirection,
     pub(crate) stack: Vec<isize>,
     pub(crate) termination_counter: u8,
+    pub(crate) stdin: Vec<char>,
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(stdin: Vec<char>) -> Self {
         Self {
             pointer_location: (0, 0),
             pointer_direction: PointerDirection::Right,
             chooser_direction: ChooserDirection::Left,
             stack: Vec::new(),
             termination_counter: 0,
+            stdin,
         }
     }
 }

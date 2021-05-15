@@ -190,14 +190,21 @@ fn roll(state: &mut State) -> () {
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
 fn in_number(state: &mut State) -> () {
-    todo!()
+    state
+        .stdin
+        .pop()
+        .and_then(|char| char.to_digit(10))
+        .map(|digit| state.stack.push(digit as isize));
 }
 
 /// Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack.
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
 fn in_char(state: &mut State) -> () {
-    todo!()
+    state
+        .stdin
+        .pop()
+        .map(|char| state.stack.push(char as isize));
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
@@ -224,14 +231,14 @@ mod test_command {
 
     #[test]
     fn test_push() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         push(&mut state, 1);
         assert_eq!(state.stack, vec![1]);
     }
 
     #[test]
     fn test_pop() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(1);
         pop(&mut state);
         assert_eq!(state.stack, vec![]);
@@ -239,13 +246,13 @@ mod test_command {
 
     #[test]
     fn test_add() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(1);
         state.stack.push(2);
         add(&mut state);
         assert_eq!(state.stack, vec![3]);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         add(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);
@@ -253,13 +260,13 @@ mod test_command {
 
     #[test]
     fn test_subtract() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(1);
         state.stack.push(2);
         subtract(&mut state);
         assert_eq!(state.stack, vec![-1]);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         subtract(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);
@@ -267,13 +274,13 @@ mod test_command {
 
     #[test]
     fn test_multiply() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(2);
         state.stack.push(3);
         multiply(&mut state);
         assert_eq!(state.stack, vec![6]);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         multiply(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);
@@ -281,19 +288,19 @@ mod test_command {
 
     #[test]
     fn test_divide() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(7);
         state.stack.push(3);
         divide(&mut state);
         assert_eq!(state.stack, vec![2]);
 
-        let mut ignore_zero_state = State::new();
+        let mut ignore_zero_state = State::new(vec![]);
         ignore_zero_state.stack.push(7);
         ignore_zero_state.stack.push(0);
         divide(&mut ignore_zero_state);
         assert_eq!(ignore_zero_state.stack, vec![7, 0]);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         divide(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);
@@ -301,19 +308,19 @@ mod test_command {
 
     #[test]
     fn test_modulo() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(7);
         state.stack.push(3);
         modulo(&mut state);
         assert_eq!(state.stack, vec![1]);
 
-        let mut ignore_zero_state = State::new();
+        let mut ignore_zero_state = State::new(vec![]);
         ignore_zero_state.stack.push(7);
         ignore_zero_state.stack.push(0);
         modulo(&mut ignore_zero_state);
         assert_eq!(ignore_zero_state.stack, vec![7, 0]);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         modulo(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);
@@ -321,12 +328,12 @@ mod test_command {
 
     #[test]
     fn test_not() {
-        let mut true_state = State::new();
+        let mut true_state = State::new(vec![]);
         true_state.stack.push(0);
         not(&mut true_state);
         assert_eq!(true_state.stack, vec![1]);
 
-        let mut false_state = State::new();
+        let mut false_state = State::new(vec![]);
         false_state.stack.push(33);
         not(&mut false_state);
         assert_eq!(false_state.stack, vec![0]);
@@ -334,19 +341,19 @@ mod test_command {
 
     #[test]
     fn test_greater() {
-        let mut greater_state = State::new();
+        let mut greater_state = State::new(vec![]);
         greater_state.stack.push(2);
         greater_state.stack.push(1);
         greater(&mut greater_state);
         assert_eq!(greater_state.stack, vec![1]);
 
-        let mut lesser_state = State::new();
+        let mut lesser_state = State::new(vec![]);
         lesser_state.stack.push(1);
         lesser_state.stack.push(2);
         greater(&mut lesser_state);
         assert_eq!(lesser_state.stack, vec![0]);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         greater(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);
@@ -354,18 +361,18 @@ mod test_command {
 
     #[test]
     fn test_pointer() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         let initial_direction = state.pointer_direction.clone();
         state.stack.push(2);
         pointer(&mut state);
         assert_eq!(state.pointer_direction, initial_direction.next().next());
 
-        let mut wrapping_state = State::new();
+        let mut wrapping_state = State::new(vec![]);
         wrapping_state.stack.push(5);
         pointer(&mut wrapping_state);
         assert_eq!(wrapping_state.pointer_direction, initial_direction.next());
 
-        let mut negative_state = State::new();
+        let mut negative_state = State::new(vec![]);
         negative_state.stack.push(-3);
         pointer(&mut negative_state);
         assert_eq!(negative_state.pointer_direction, initial_direction.next());
@@ -373,18 +380,18 @@ mod test_command {
 
     #[test]
     fn test_switch() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         let initial_direction = state.chooser_direction.clone();
         state.stack.push(1);
         switch(&mut state);
         assert_eq!(state.chooser_direction, initial_direction.next());
 
-        let mut wrapping_state = State::new();
+        let mut wrapping_state = State::new(vec![]);
         wrapping_state.stack.push(4);
         switch(&mut wrapping_state);
         assert_eq!(wrapping_state.chooser_direction, initial_direction);
 
-        let mut absolute_state = State::new();
+        let mut absolute_state = State::new(vec![]);
         wrapping_state.stack.push(-3);
         switch(&mut wrapping_state);
         assert_eq!(wrapping_state.chooser_direction, initial_direction.next());
@@ -392,7 +399,7 @@ mod test_command {
 
     #[test]
     fn test_duplicate() {
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.push(1);
         duplicate(&mut state);
         assert_eq!(state.stack, vec![1, 1]);
@@ -402,14 +409,14 @@ mod test_command {
     fn test_roll() {
         let simple_stack: Vec<isize> = vec![1, 2, 3, 4, 5, 6];
 
-        let mut state = State::new();
+        let mut state = State::new(vec![]);
         state.stack.append(&mut simple_stack.clone());
         state.stack.push(3); // depth
         state.stack.push(2); // turns
         roll(&mut state);
         assert_eq!(state.stack, vec![1, 2, 3, 5, 6, 4]);
 
-        let mut negative_turns_state = State::new();
+        let mut negative_turns_state = State::new(vec![]);
         negative_turns_state.stack.append(&mut simple_stack.clone());
         negative_turns_state.stack.push(3); // depth
         negative_turns_state.stack.push(-2); // turns
@@ -417,7 +424,7 @@ mod test_command {
         roll(&mut negative_turns_state);
         assert_eq!(negative_turns_state.stack, vec![1, 2, 3, 6, 4, 5]);
 
-        let mut negative_depth_state = State::new();
+        let mut negative_depth_state = State::new(vec![]);
         negative_depth_state.stack.append(&mut simple_stack.clone());
         negative_depth_state.stack.push(-1); // depth
         negative_depth_state.stack.push(2); // turns
@@ -425,7 +432,7 @@ mod test_command {
         roll(&mut negative_depth_state);
         assert_eq!(negative_depth_state.stack, negative_depth_initial);
 
-        let mut short_state = State::new();
+        let mut short_state = State::new(vec![]);
         short_state.stack.push(1);
         roll(&mut short_state);
         assert_eq!(short_state.stack, vec![1]);

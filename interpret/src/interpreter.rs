@@ -18,10 +18,10 @@ pub struct Interpreter {
 
 impl Interpreter {
     /// Initializes the interpreter with a program.
-    pub fn new(program: Program) -> Self {
+    pub fn new(program: Program, stdin: Vec<char>) -> Self {
         Interpreter {
             program,
-            state: State::new(),
+            state: State::new(stdin),
         }
     }
 
