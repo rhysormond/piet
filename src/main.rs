@@ -1,9 +1,9 @@
+use std::io::{self, Read};
+
 use clap::Clap;
 
 use interpret::interpreter::Interpreter;
 use parse::program::Program;
-
-use std::io::{self, Read};
 
 #[derive(Clap)]
 struct Opts {

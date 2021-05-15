@@ -96,7 +96,7 @@ fn modulo(state: &mut State) -> () {
 
 /// Replaces the top value of the stack with 0 if it is non-zero, and 1 if it is zero.
 fn not(state: &mut State) -> () {
-    state.stack.pop().map( |top| {
+    state.stack.pop().map(|top| {
         state.stack.push(if top == 0 { 1 } else { 0 });
     });
 }
@@ -112,7 +112,7 @@ fn greater(state: &mut State) -> () {
 
 /// Pops the top value off the stack and rotates the DP clockwise that many steps (anticlockwise if negative).
 fn pointer(state: &mut State) -> () {
-    state.stack.pop().map( |top| {
+    state.stack.pop().map(|top| {
         let clockwise_steps = {
             let absolute_steps = top % 4;
             if absolute_steps >= 0 {
