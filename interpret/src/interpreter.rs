@@ -76,8 +76,14 @@ impl Interpreter {
     ///  - whether a white region was traversed
     /// TODO: the return type can be strengthened to Codel::Color without too much work
     fn next_coordinates(&self) -> Option<((usize, usize), &Codel, bool)> {
-        let first_edge = self.disjoint_edge_coordinate(self.state.pointer_location, self.state.pointer_direction);
-        let second_edge = self.disjoint_edge_coordinate(first_edge, self.state.pointer_direction.with_chooser(self.state.chooser_direction));
+        let first_edge = self
+            .disjoint_edge_coordinate(self.state.pointer_location, self.state.pointer_direction);
+        let second_edge = self.disjoint_edge_coordinate(
+            first_edge,
+            self.state
+                .pointer_direction
+                .with_chooser(self.state.chooser_direction),
+        );
 
         // Check if we're moving into:
         //  - either the edge of the program or a black codel in which case we stop
@@ -85,16 +91,25 @@ impl Interpreter {
         //    - find and move to the first edge and then stop (even if there are other non-contiguous ones later)
         //    - step into it if it's a colored codel, otherwise stay in the current white codel
         //  - a colored codel in which case we step one square into it and stop
-        if let Some((next_location, next_codel)) = self.program.maybe_next_codel(second_edge, self.state.pointer_direction) {
+        if let Some((next_location, next_codel)) = self
+            .program
+            .maybe_next_codel(second_edge, self.state.pointer_direction)
+        {
             match next_codel {
                 Codel::Black => None,
                 Codel::White => {
                     // Find the edge of the white region
-                    let white_edge = self.edge_coordinate(next_location, self.state.pointer_direction);
+                    let white_edge =
+                        self.edge_coordinate(next_location, self.state.pointer_direction);
                     // If we're about to step into a colored codel, do it; otherwise, stop at the edge
-                    match self.program.maybe_next_codel(white_edge, self.state.pointer_direction) {
+                    match self
+                        .program
+                        .maybe_next_codel(white_edge, self.state.pointer_direction)
+                    {
                         // TODO: ideally this guard would be written to just ensure that this IS colored rather than NOT everything else
-                        Some((color_location, color_codel)) if color_codel != &Codel::White && color_codel != &Codel::Black => {
+                        Some((color_location, color_codel))
+                            if color_codel != &Codel::White && color_codel != &Codel::Black =>
+                        {
                             Some((color_location, color_codel, true))
                         }
                         _ => Some((white_edge, &Codel::White, true)),
@@ -108,26 +123,29 @@ impl Interpreter {
     }
 
     /// The coordinate of the closest region edge (exclusive) reached starting from `start` and moving in `direction`.
-    fn edge_coordinate(&self, start: (usize, usize), direction: PointerDirection) -> (usize, usize) {
+    fn edge_coordinate(
+        &self,
+        start: (usize, usize),
+        direction: PointerDirection,
+    ) -> (usize, usize) {
         let codel = self.program.codel_at(start);
         let mut pointer = start;
         let mut edge = false;
         while !edge {
             match self.program.maybe_next_codel(pointer, direction) {
-                Some((next_pointer, next_codel)) if next_codel == codel => {
-                    pointer = next_pointer
-                }
-                _ => edge = true
+                Some((next_pointer, next_codel)) if next_codel == codel => pointer = next_pointer,
+                _ => edge = true,
             }
-        };
+        }
         pointer
     }
 
     /// The coordinate of the farthest region edge (exclusive) reached starting from `start` and moving in `direction`.
-    fn disjoint_edge_coordinate(&self, start: (usize, usize), direction: PointerDirection) -> (usize, usize) {
-        self
-            .program
-            .region_at(start)
-            .edge(start, direction.into())
+    fn disjoint_edge_coordinate(
+        &self,
+        start: (usize, usize),
+        direction: PointerDirection,
+    ) -> (usize, usize) {
+        self.program.region_at(start).edge(start, direction.into())
     }
 }

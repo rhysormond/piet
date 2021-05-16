@@ -29,11 +29,7 @@ impl Program {
     pub fn new(codels: Vec<Vec<Codel>>, rows: usize, cols: usize) -> Program {
         let points = Self::get_points(&codels, &rows, &cols);
 
-        Program {
-            points,
-            rows,
-            cols,
-        }
+        Program { points, rows, cols }
     }
 
     /// Loads a program from a file given its path.
@@ -61,21 +57,23 @@ impl Program {
         // TODO: there's a lot of gross cloning to get rid of here
         (0..*rows)
             .map(|row| {
-                (0..*cols).map(|col| {
-                    let location = (row, col);
-                    let codel = codels[row][col].clone();
-                    // Build a region if the codel hasn't been seen before
-                    let region = if let Some(region) = regions.get(&location) {
-                        region.clone()
-                    } else {
-                        let region = Self::get_region(codels, location);
-                        for member in &region.members {
-                            regions.insert(*member, region.clone());
-                        }
-                        region
-                    };
-                    Point { codel, region }
-                }).collect()
+                (0..*cols)
+                    .map(|col| {
+                        let location = (row, col);
+                        let codel = codels[row][col].clone();
+                        // Build a region if the codel hasn't been seen before
+                        let region = if let Some(region) = regions.get(&location) {
+                            region.clone()
+                        } else {
+                            let region = Self::get_region(codels, location);
+                            for member in &region.members {
+                                regions.insert(*member, region.clone());
+                            }
+                            region
+                        };
+                        Point { codel, region }
+                    })
+                    .collect()
             })
             .collect()
     }
@@ -88,7 +86,7 @@ impl Program {
 
         for &neighbor in &neighbors {
             seen.insert(neighbor);
-        };
+        }
 
         let (row, col) = point;
         let codel = &codels[row][col];
@@ -106,7 +104,7 @@ impl Program {
                         }
                     }
                 }
-                _ => ()
+                _ => (),
             }
         }
 
@@ -129,12 +127,14 @@ impl Program {
     }
 
     /// Gets the next codel along with its coordinates if one exists.
-    pub fn maybe_next_codel<T: Into<ProgramDirection>>(&self, start: (usize, usize), direction: T) -> Option<((usize, usize), &Codel)> {
+    pub fn maybe_next_codel<T: Into<ProgramDirection>>(
+        &self,
+        start: (usize, usize),
+        direction: T,
+    ) -> Option<((usize, usize), &Codel)> {
         let (row, col) = start;
         let maybe_next = match direction.into() {
-            ProgramDirection::Up => row
-                .checked_sub(1)
-                .map(|next_row| (next_row, col)),
+            ProgramDirection::Up => row.checked_sub(1).map(|next_row| (next_row, col)),
             ProgramDirection::Down => {
                 let next_row = row + 1;
                 if next_row < self.rows {
@@ -143,9 +143,7 @@ impl Program {
                     None
                 }
             }
-            ProgramDirection::Left => col
-                .checked_sub(1)
-                .map(|next_col| (row, next_col)),
+            ProgramDirection::Left => col.checked_sub(1).map(|next_col| (row, next_col)),
             ProgramDirection::Right => {
                 let next_col = col + 1;
                 if next_col < self.cols {
@@ -184,12 +182,24 @@ mod test_program {
         let program = Program::new(codels, 2, 2);
         let expected = vec![
             vec![
-                Point { codel: Codel::White, region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()) },
-                Point { codel: Codel::White, region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()) }
+                Point {
+                    codel: Codel::White,
+                    region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()),
+                },
+                Point {
+                    codel: Codel::White,
+                    region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()),
+                },
             ],
             vec![
-                Point { codel: Codel::White, region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()) },
-                Point { codel: Codel::Black, region: Region::new(vec![(1, 1)].into_iter().collect()) }
+                Point {
+                    codel: Codel::White,
+                    region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()),
+                },
+                Point {
+                    codel: Codel::Black,
+                    region: Region::new(vec![(1, 1)].into_iter().collect()),
+                },
             ],
         ];
         assert_eq!(program.points, expected);
@@ -198,30 +208,114 @@ mod test_program {
     #[test]
     fn test_maybe_next_codel() {
         let codels = vec![
-            vec![Codel::Color { hue: 0, lightness: 0 }, Codel::Color { hue: 0, lightness: 1 }, Codel::Color { hue: 0, lightness: 2 }],
-            vec![Codel::Color { hue: 1, lightness: 0 }, Codel::Color { hue: 1, lightness: 1 }, Codel::Color { hue: 1, lightness: 2 }],
-            vec![Codel::Color { hue: 2, lightness: 0 }, Codel::Color { hue: 2, lightness: 1 }, Codel::Color { hue: 2, lightness: 2 }],
+            vec![
+                Codel::Color {
+                    hue: 0,
+                    lightness: 0,
+                },
+                Codel::Color {
+                    hue: 0,
+                    lightness: 1,
+                },
+                Codel::Color {
+                    hue: 0,
+                    lightness: 2,
+                },
+            ],
+            vec![
+                Codel::Color {
+                    hue: 1,
+                    lightness: 0,
+                },
+                Codel::Color {
+                    hue: 1,
+                    lightness: 1,
+                },
+                Codel::Color {
+                    hue: 1,
+                    lightness: 2,
+                },
+            ],
+            vec![
+                Codel::Color {
+                    hue: 2,
+                    lightness: 0,
+                },
+                Codel::Color {
+                    hue: 2,
+                    lightness: 1,
+                },
+                Codel::Color {
+                    hue: 2,
+                    lightness: 2,
+                },
+            ],
         ];
         let program = Program::new(codels, 3, 3);
 
         // corners
         assert_eq!(program.maybe_next_codel((0, 0), ProgramDirection::Up), None);
-        assert_eq!(program.maybe_next_codel((0, 0), ProgramDirection::Left), None);
-        assert_eq!(program.maybe_next_codel((2, 2), ProgramDirection::Right), None);
-        assert_eq!(program.maybe_next_codel((2, 2), ProgramDirection::Down), None);
+        assert_eq!(
+            program.maybe_next_codel((0, 0), ProgramDirection::Left),
+            None
+        );
+        assert_eq!(
+            program.maybe_next_codel((2, 2), ProgramDirection::Right),
+            None
+        );
+        assert_eq!(
+            program.maybe_next_codel((2, 2), ProgramDirection::Down),
+            None
+        );
 
         // corners
-        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Up), Some(((0, 1), &Codel::Color { hue: 0, lightness: 1 })));
-        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Left), Some(((1, 0), &Codel::Color { hue: 1, lightness: 0 })));
-        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Right), Some(((1, 2), &Codel::Color { hue: 1, lightness: 2 })));
-        assert_eq!(program.maybe_next_codel((1, 1), ProgramDirection::Down), Some(((2, 1), &Codel::Color { hue: 2, lightness: 1 })));
+        assert_eq!(
+            program.maybe_next_codel((1, 1), ProgramDirection::Up),
+            Some((
+                (0, 1),
+                &Codel::Color {
+                    hue: 0,
+                    lightness: 1
+                }
+            ))
+        );
+        assert_eq!(
+            program.maybe_next_codel((1, 1), ProgramDirection::Left),
+            Some((
+                (1, 0),
+                &Codel::Color {
+                    hue: 1,
+                    lightness: 0
+                }
+            ))
+        );
+        assert_eq!(
+            program.maybe_next_codel((1, 1), ProgramDirection::Right),
+            Some((
+                (1, 2),
+                &Codel::Color {
+                    hue: 1,
+                    lightness: 2
+                }
+            ))
+        );
+        assert_eq!(
+            program.maybe_next_codel((1, 1), ProgramDirection::Down),
+            Some((
+                (2, 1),
+                &Codel::Color {
+                    hue: 2,
+                    lightness: 1
+                }
+            ))
+        );
     }
 
     #[test]
     fn test_codel_at() {
         let codels = vec![
             vec![Codel::White, Codel::White],
-            vec![Codel::White, Codel::Black]
+            vec![Codel::White, Codel::Black],
         ];
         let program = Program::new(codels, 2, 2);
         assert_eq!(program.codel_at((1, 1)), &Codel::Black);
@@ -231,9 +325,15 @@ mod test_program {
     fn test_region_at() {
         let codels = vec![
             vec![Codel::White, Codel::White],
-            vec![Codel::White, Codel::Black]
+            vec![Codel::White, Codel::Black],
         ];
         let program = Program::new(codels, 2, 2);
-        assert_eq!(program.region_at((1, 1)), &Region { members: vec![(1, 1)].into_iter().collect(), size: 1 });
+        assert_eq!(
+            program.region_at((1, 1)),
+            &Region {
+                members: vec![(1, 1)].into_iter().collect(),
+                size: 1
+            }
+        );
     }
 }

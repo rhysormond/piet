@@ -1,4 +1,4 @@
-pub mod interpreter;
-mod direction;
-mod state;
 mod command;
+mod direction;
+pub mod interpreter;
+mod state;

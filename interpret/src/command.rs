@@ -31,7 +31,10 @@ pub fn execute(state: &mut State, delta_hue: u8, delta_lightness: u8, current_re
         (5, 0) => in_char(state),
         (5, 1) => out_number(state),
         (5, 2) => out_char(state),
-        _ => panic!("Unexpected hue ({}) / lightness ({}) change", delta_hue, delta_lightness),
+        _ => panic!(
+            "Unexpected hue ({}) / lightness ({}) change",
+            delta_hue, delta_lightness
+        ),
     };
 }
 
@@ -164,7 +167,14 @@ fn roll(state: &mut State) {
             .stack
             .get(final_stack_size)
             .and_then(|depth| usize::try_from(*depth).ok())
-            .and_then(|depth| if depth <= final_stack_size { Some(depth) } else { None }) {
+            .and_then(|depth| {
+                if depth <= final_stack_size {
+                    Some(depth)
+                } else {
+                    None
+                }
+            })
+        {
             let turns = state.stack.pop().unwrap();
             let _depth = state.stack.pop().unwrap();
 
@@ -187,26 +197,25 @@ fn roll(state: &mut State) {
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
 fn in_number(state: &mut State) {
-    if let Some(digit) = state
-        .stdin
-        .pop()
-        .and_then(|char| char.to_digit(10)) { state.stack.push(digit as isize) }
+    if let Some(digit) = state.stdin.pop().and_then(|char| char.to_digit(10)) {
+        state.stack.push(digit as isize)
+    }
 }
 
 /// Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack.
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
 fn in_char(state: &mut State) {
-    if let Some(char) = state
-        .stdin
-        .pop() { state.stack.push(char as isize) }
+    if let Some(char) = state.stdin.pop() {
+        state.stack.push(char as isize)
+    }
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
 fn out_number(state: &mut State) {
-    if let Some(top) = state
-        .stack
-        .pop() { print!("{}", top) }
+    if let Some(top) = state.stack.pop() {
+        print!("{}", top)
+    }
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
@@ -215,7 +224,10 @@ fn out_char(state: &mut State) {
         .stack
         .pop()
         .and_then(|top| u32::try_from(top).ok())
-        .and_then(std::char::from_u32) { print!("{}", char) }
+        .and_then(std::char::from_u32)
+    {
+        print!("{}", char)
+    }
 }
 
 #[cfg(test)]
@@ -432,17 +444,25 @@ mod test_command {
 
     #[test]
     #[ignore]
-    fn test_in_number() { todo!(); }
+    fn test_in_number() {
+        todo!();
+    }
 
     #[test]
     #[ignore]
-    fn test_in_char() { todo!(); }
+    fn test_in_char() {
+        todo!();
+    }
 
     #[test]
     #[ignore]
-    fn test_out_number() { todo!(); }
+    fn test_out_number() {
+        todo!();
+    }
 
     #[test]
     #[ignore]
-    fn test_out_char() { todo!(); }
+    fn test_out_char() {
+        todo!();
+    }
 }

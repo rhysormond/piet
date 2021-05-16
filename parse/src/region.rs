@@ -13,10 +13,7 @@ pub struct Region {
 impl Region {
     pub fn new(members: HashSet<(usize, usize)>) -> Region {
         let size = members.len();
-        Region {
-            members,
-            size,
-        }
+        Region { members, size }
     }
 
     /// The coordinate of the farthest region edge (exclusive) reached starting from `start` and moving in `direction`.
@@ -33,39 +30,22 @@ impl Region {
 
     /// The rows of all codels in the same column in ascending order.
     fn codels_in_col(&self, col: usize) -> Vec<&usize> {
-        self
-            .members
+        self.members
             .iter()
-            .filter_map(
-                |(p_row, p_col)|
-                    if p_col == &col {
-                        Some(p_row)
-                    } else {
-                        None
-                    }
-            )
+            .filter_map(|(p_row, p_col)| if p_col == &col { Some(p_row) } else { None })
             .sorted()
             .collect()
     }
 
     /// The columns of all codels in the same row in ascending order.
     fn codels_in_row(&self, row: usize) -> Vec<&usize> {
-        self
-            .members
+        self.members
             .iter()
-            .filter_map(
-                |(p_row, p_col)|
-                    if p_row == &row {
-                        Some(p_col)
-                    } else {
-                        None
-                    }
-            )
+            .filter_map(|(p_row, p_col)| if p_row == &row { Some(p_col) } else { None })
             .sorted()
             .collect()
     }
 }
-
 
 #[cfg(test)]
 mod test_region {
@@ -87,11 +67,20 @@ mod test_region {
 
     #[test]
     fn test_edge() {
-        let region = Region::new(vec![
-            (0, 0), (0, 1), (0, 2),
-            (1, 0), (1, 2),
-            (2, 0), (2, 1), (2, 2),
-        ].into_iter().collect());
+        let region = Region::new(
+            vec![
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (1, 0),
+                (1, 2),
+                (2, 0),
+                (2, 1),
+                (2, 2),
+            ]
+            .into_iter()
+            .collect(),
+        );
 
         // Not disjoint
         assert_eq!(region.edge((0, 0), ProgramDirection::Down), (2, 0));
