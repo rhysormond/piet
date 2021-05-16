@@ -42,7 +42,6 @@ impl Interpreter {
                 if current_color == &&Color::White || passed_white {
                     (0, 0)
                 } else {
-                    // TODO: The colors should both always be Color::Color, tighten this guarantee
                     current_color.compare(&next_color).unwrap()
                 }
             };
@@ -74,7 +73,6 @@ impl Interpreter {
     ///  - coordinates of the next region
     ///  - the next region's color
     ///  - whether a white region was traversed
-    /// TODO: the return type can be strengthened to Color::Color without too much work
     fn next_coordinates(&self) -> Option<((usize, usize), &Color, bool)> {
         let first_edge = self.next_disjoint_edge(self.state.pointer, self.state.direction);
         let second_edge =
@@ -86,30 +84,21 @@ impl Interpreter {
         //    - find and move to the first edge and then stop (even if there are other non-contiguous ones later)
         //    - step into it if it's a colored codel, otherwise stay in the current white codel
         //  - a colored codel in which case we step one square into it and stop
-        if let Some((next_location, next_color)) = self
-            .program
-            .maybe_next_point(second_edge, self.state.direction)
+        if let Some((next_location, next_color)) =
+            self.program.next_point(second_edge, self.state.direction)
         {
             match next_color {
                 Color::Black => None,
                 Color::White => {
-                    // Find the edge of the white region
+                    // Find the first edge of the white region ignoring any potential further, disjoint ones
                     let white_edge = self.next_edge(next_location, self.state.direction);
-                    // If we're about to step into a colored codel, do it; otherwise, stop at the edge
-                    match self
-                        .program
-                        .maybe_next_point(white_edge, self.state.direction)
-                    {
-                        // TODO: ideally this guard would be written to just ensure that this IS colored rather than NOT everything else
-                        Some((location, color))
-                            if color != &Color::White && color != &Color::Black =>
-                        {
-                            Some((location, color, true))
-                        }
+                    // If we're about to step into a Color::Color codel, do it; otherwise, stop at the edge
+                    match self.program.next_point(white_edge, self.state.direction) {
+                        Some((point, color @ Color { .. })) => Some((point, color, true)),
                         _ => Some((white_edge, &Color::White, true)),
                     }
                 }
-                _ => Some((next_location, next_color, false)),
+                color @ Color::Color { .. } => Some((next_location, color, false)),
             }
         } else {
             None
@@ -121,7 +110,7 @@ impl Interpreter {
         let color = self.program.color_at(start);
         let mut pointer = start;
         loop {
-            match self.program.maybe_next_point(pointer, direction) {
+            match self.program.next_point(pointer, direction) {
                 Some((next_pointer, next_color)) if next_color == color => pointer = next_pointer,
                 _ => break pointer,
             }
