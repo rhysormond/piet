@@ -113,6 +113,6 @@ impl Interpreter {
 
     /// The coordinate of the farthest region edge (exclusive) reached starting from `start` and moving in `direction`.
     fn next_disjoint_edge(&self, start: (usize, usize), direction: Direction) -> (usize, usize) {
-        self.program.region_at(start).edge(start, direction.into())
+        self.program.region_at(start).edge(start, direction)
     }
 }
