@@ -80,13 +80,9 @@ impl Program {
 
     /// Get all members of the same contiguous region of color
     fn get_region(colors: &[Vec<Color>], point: (usize, usize)) -> Region {
-        let mut seen = HashSet::new();
         let mut members = HashSet::new();
         let mut neighbors = vec![point];
-
-        for &neighbor in &neighbors {
-            seen.insert(neighbor);
-        }
+        let mut seen = neighbors.into_iter().collect();
 
         let (row, col) = point;
         let color = &colors[row][col];
@@ -156,16 +152,20 @@ impl Program {
         maybe_next.map(|next| (next, self.color_at(next)))
     }
 
+    /// Gets the codel at the specified (row, column) point.
+    fn codel_at(&self, point: (usize, usize)) -> &Codel {
+        let (row, col) = point;
+        &self.points[row][col]
+    }
+
     /// Gets the color at the specified (row, column) point.
     pub fn color_at(&self, point: (usize, usize)) -> &Color {
-        let (row, col) = point;
-        &self.points[row][col].color
+        &self.codel_at(point).color
     }
 
     /// Gets the region at the specified (row, column) point.
     pub fn region_at(&self, point: (usize, usize)) -> &Region {
-        let (row, col) = point;
-        &self.points[row][col].region
+        &self.codel_at(point).region
     }
 }
 
