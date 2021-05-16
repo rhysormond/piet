@@ -96,9 +96,9 @@ fn modulo(state: &mut State) {
 
 /// Replaces the top value of the stack with 0 if it is non-zero, and 1 if it is zero.
 fn not(state: &mut State) {
-    state.stack.pop().map(|top| {
+    if let Some(top) = state.stack.pop() {
         state.stack.push(if top == 0 { 1 } else { 0 });
-    });
+    }
 }
 
 /// Pops the top two values off the stack, and pushes 1 on to the stack if the second top value is greater than the top value, and pushes 0 if it is not greater.
@@ -112,7 +112,7 @@ fn greater(state: &mut State) {
 
 /// Pops the top value off the stack and rotates the DP clockwise that many steps (anticlockwise if negative).
 fn pointer(state: &mut State) {
-    state.stack.pop().map(|top| {
+    if let Some(top) = state.stack.pop() {
         let clockwise_steps = {
             let absolute_steps = top % 4;
             if absolute_steps >= 0 {
@@ -124,25 +124,25 @@ fn pointer(state: &mut State) {
         for _ in 0..clockwise_steps {
             state.pointer_direction = state.pointer_direction.next();
         }
-    });
+    }
 }
 
 /// Pops the top value off the stack and toggles the CC that many times (the absolute value of that many times if negative).
 fn switch(state: &mut State) {
-    state.stack.pop().map(|top| {
+    if let Some(top) = state.stack.pop() {
         let steps = (top % 2).abs();
         for _ in 0..steps {
             state.chooser_direction = state.chooser_direction.next();
         }
-    });
+    }
 }
 
 /// Pushes a copy of the top value on the stack on to the stack.
 fn duplicate(state: &mut State) {
-    state.stack.pop().map(|top| {
+    if let Some(top) = state.stack.pop() {
         state.stack.push(top);
         state.stack.push(top);
-    });
+    }
 }
 
 /// Pops the top two values off the stack and "rolls" the remaining stack entries to a depth equal to the second value popped, by a number of rolls equal to the first value popped.
@@ -160,29 +160,26 @@ fn roll(state: &mut State) {
     //  - the roll depth is not greater than the stack size after popping off the top two elements
     if let Some(final_stack_size) = maybe_final_stack_size {
         // TODO: this is sloppy and full of redundant checks, it'll be easy to clean up after if let chains are added
-        state
+        if let Some(depth) = state
             .stack
             .get(final_stack_size)
             .and_then(|depth| usize::try_from(*depth).ok())
-            .and_then(|depth| if depth <= final_stack_size { Some(depth) } else { None })
-            .map(|depth|
-                {
-                    let turns = state.stack.pop().unwrap();
-                    let _depth = state.stack.pop().unwrap();
+            .and_then(|depth| if depth <= final_stack_size { Some(depth) } else { None }) {
+            let turns = state.stack.pop().unwrap();
+            let _depth = state.stack.pop().unwrap();
 
-                    if turns >= 0 {
-                        for _ in 0..turns {
-                            let top = state.stack.pop().unwrap();
-                            state.stack.insert(final_stack_size - depth, top);
-                        }
-                    } else {
-                        for _ in turns..0 {
-                            let bottom = state.stack.remove(final_stack_size - depth);
-                            state.stack.push(bottom);
-                        }
-                    }
+            if turns >= 0 {
+                for _ in 0..turns {
+                    let top = state.stack.pop().unwrap();
+                    state.stack.insert(final_stack_size - depth, top);
                 }
-            );
+            } else {
+                for _ in turns..0 {
+                    let bottom = state.stack.remove(final_stack_size - depth);
+                    state.stack.push(bottom);
+                }
+            }
+        }
     }
 }
 
@@ -190,39 +187,35 @@ fn roll(state: &mut State) {
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
 fn in_number(state: &mut State) {
-    state
+    if let Some(digit) = state
         .stdin
         .pop()
-        .and_then(|char| char.to_digit(10))
-        .map(|digit| state.stack.push(digit as isize));
+        .and_then(|char| char.to_digit(10)) { state.stack.push(digit as isize) }
 }
 
 /// Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack.
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
 fn in_char(state: &mut State) {
-    state
+    if let Some(char) = state
         .stdin
-        .pop()
-        .map(|char| state.stack.push(char as isize));
+        .pop() { state.stack.push(char as isize) }
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
 fn out_number(state: &mut State) {
-    state
+    if let Some(top) = state
         .stack
-        .pop()
-        .map(|top| print!("{}", top));
+        .pop() { print!("{}", top) }
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
 fn out_char(state: &mut State) {
-    state
+    if let Some(char) = state
         .stack
         .pop()
         .and_then(|top| u32::try_from(top).ok())
-        .and_then(std::char::from_u32)
-        .map(|char| print!("{}", char));
+        .and_then(std::char::from_u32) { print!("{}", char) }
 }
 
 #[cfg(test)]
