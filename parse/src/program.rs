@@ -110,16 +110,15 @@ impl Program {
     /// Get all the neighbors of a given point
     fn neighbors(point: (usize, usize)) -> Vec<(usize, usize)> {
         let (row, col) = point;
-        // TODO: this is really gross, maybe just give up and use isizes instead
-        let mut neighbors = match (row.checked_sub(1), col.checked_sub(1)) {
-            (Some(row_sub), Some(col_sub)) => vec![(row_sub, col), (row, col_sub)],
-            (Some(row_sub), None) => vec![(row_sub, col)],
-            (None, Some(col_sub)) => vec![(row, col_sub)],
-            (None, None) => vec![],
-        };
-        neighbors.push((row + 1, col));
-        neighbors.push((row, col + 1));
-        neighbors
+        vec![
+            row.checked_sub(1).map(|s_row| (s_row, col)),
+            col.checked_sub(1).map(|s_col| (row, s_col)),
+            Some((row + 1, col)),
+            Some((row, col + 1)),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
     }
 
     /// Gets the next color in the given direction along with its coordinates if one exists.
