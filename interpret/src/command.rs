@@ -125,7 +125,7 @@ fn pointer(state: &mut State) {
             }
         };
         for _ in 0..clockwise_steps {
-            state.pointer_direction = state.pointer_direction.next();
+            state.direction = state.direction.next();
         }
     }
 }
@@ -135,7 +135,7 @@ fn switch(state: &mut State) {
     if let Some(top) = state.stack.pop() {
         let steps = (top % 2).abs();
         for _ in 0..steps {
-            state.chooser_direction = state.chooser_direction.next();
+            state.chooser = state.chooser.next();
         }
     }
 }
@@ -367,39 +367,39 @@ mod test_command {
     #[test]
     fn test_pointer() {
         let mut state = State::new(vec![]);
-        let initial_direction = state.pointer_direction.clone();
+        let initial_direction = state.direction.clone();
         state.stack.push(2);
         pointer(&mut state);
-        assert_eq!(state.pointer_direction, initial_direction.next().next());
+        assert_eq!(state.direction, initial_direction.next().next());
 
         let mut wrapping_state = State::new(vec![]);
         wrapping_state.stack.push(5);
         pointer(&mut wrapping_state);
-        assert_eq!(wrapping_state.pointer_direction, initial_direction.next());
+        assert_eq!(wrapping_state.direction, initial_direction.next());
 
         let mut negative_state = State::new(vec![]);
         negative_state.stack.push(-3);
         pointer(&mut negative_state);
-        assert_eq!(negative_state.pointer_direction, initial_direction.next());
+        assert_eq!(negative_state.direction, initial_direction.next());
     }
 
     #[test]
     fn test_switch() {
         let mut state = State::new(vec![]);
-        let initial_direction = state.chooser_direction.clone();
+        let initial_direction = state.chooser.clone();
         state.stack.push(1);
         switch(&mut state);
-        assert_eq!(state.chooser_direction, initial_direction.next());
+        assert_eq!(state.chooser, initial_direction.next());
 
         let mut wrapping_state = State::new(vec![]);
         wrapping_state.stack.push(4);
         switch(&mut wrapping_state);
-        assert_eq!(wrapping_state.chooser_direction, initial_direction);
+        assert_eq!(wrapping_state.chooser, initial_direction);
 
         let mut absolute_state = State::new(vec![]);
         absolute_state.stack.push(-3);
         switch(&mut absolute_state);
-        assert_eq!(absolute_state.chooser_direction, initial_direction.next());
+        assert_eq!(absolute_state.chooser, initial_direction.next());
     }
 
     #[test]
