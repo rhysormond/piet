@@ -60,21 +60,23 @@ impl Program {
 
         // TODO: there's a lot of gross cloning to get rid of here
         (0..*rows)
-            .map(|row| {(0..*cols).map(|col| {
-                let location = (row, col);
-                let codel = codels[row][col].clone();
-                // Build a region if the codel hasn't been seen before
-                let region = if let Some(region) =  regions.get(&location) {
-                    region.clone()
-                } else {
-                    let region = Self::get_region(codels, location);
-                    for member in &region.members {
-                        regions.insert(*member, region.clone());
-                    }
-                   region
-                };
-                Point {codel , region}
-            }).collect()})
+            .map(|row| {
+                (0..*cols).map(|col| {
+                    let location = (row, col);
+                    let codel = codels[row][col].clone();
+                    // Build a region if the codel hasn't been seen before
+                    let region = if let Some(region) = regions.get(&location) {
+                        region.clone()
+                    } else {
+                        let region = Self::get_region(codels, location);
+                        for member in &region.members {
+                            regions.insert(*member, region.clone());
+                        }
+                        region
+                    };
+                    Point { codel, region }
+                }).collect()
+            })
             .collect()
     }
 
