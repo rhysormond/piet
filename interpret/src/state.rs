@@ -21,6 +21,7 @@ pub struct State {
 }
 
 impl State {
+    /// NOTE: Reverses `stdin` as we want to simulate pushing each element onto the stack.
     pub fn new(stdin: Vec<char>) -> Self {
         Self {
             pointer_location: (0, 0),
@@ -28,7 +29,7 @@ impl State {
             chooser_direction: ChooserDirection::Left,
             stack: Vec::new(),
             termination_counter: 0,
-            stdin,
+            stdin: stdin.into_iter().rev().collect(),
         }
     }
 }
