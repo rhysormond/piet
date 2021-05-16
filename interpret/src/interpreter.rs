@@ -124,8 +124,10 @@ impl Interpreter {
     }
 
     /// The coordinate of the farthest region edge (exclusive) reached starting from `start` and moving in `direction`.
-    /// TODO: this needs to support disjoint regions, we can't just assume the first edge that we hit is the last one
     fn disjoint_edge_coordinate(&self, start: (usize, usize), direction: PointerDirection) -> (usize, usize) {
-        self.edge_coordinate(start, direction)
+        self
+            .program
+            .region_at(start)
+            .edge(start, direction.into())
     }
 }
