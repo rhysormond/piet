@@ -96,7 +96,7 @@ impl Interpreter {
                         // TODO: ideally this guard would be written to just ensure that this IS colored rather than NOT everything else
                         Some((color_location, color_codel)) if color_codel != &Codel::White && color_codel != &Codel::Black => {
                             Some((color_location, color_codel, true))
-                        },
+                        }
                         _ => Some((white_edge, &Codel::White, true)),
                     }
                 }
