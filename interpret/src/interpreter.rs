@@ -68,9 +68,9 @@ impl Interpreter {
     ///  - the next region's color
     ///  - whether a white region was traversed
     fn next_coordinates(&self) -> Option<((usize, usize), &Color, bool)> {
-        let first_edge = self.next_disjoint_edge(self.state.pointer, self.state.direction);
-        let second_edge =
-            self.next_disjoint_edge(first_edge, self.state.chooser.choose(self.state.direction));
+        let direction = self.state.direction;
+        let first_edge = self.next_disjoint_edge(self.state.pointer, direction);
+        let second_edge = self.next_disjoint_edge(first_edge, self.state.chooser.choose(direction));
 
         // Check if we're moving into:
         //  - either the edge of the program or a black codel in which case we stop
@@ -79,15 +79,15 @@ impl Interpreter {
         //    - step into it if it's a colored codel, otherwise stay in the current white codel
         //  - a colored codel in which case we step one square into it and stop
         self.program
-            .next_point(second_edge, self.state.direction)
+            .next_point(second_edge, direction)
             .and_then(|(next_location, next_color)| {
                 match next_color {
                     Color::Black => None,
                     Color::White => {
                         // Find the first edge of the white region ignoring any potential further, disjoint ones
-                        let white_edge = self.next_edge(next_location, self.state.direction);
+                        let white_edge = self.next_edge(next_location, direction);
                         // If we're about to step into a Color::Color codel, do it; otherwise, stop at the edge
-                        match self.program.next_point(white_edge, self.state.direction) {
+                        match self.program.next_point(white_edge, direction) {
                             Some((point, color @ Color::Color { .. })) => {
                                 Some((point, color, true))
                             }
