@@ -84,25 +84,25 @@ impl Interpreter {
         //    - find and move to the first edge and then stop (even if there are other non-contiguous ones later)
         //    - step into it if it's a colored codel, otherwise stay in the current white codel
         //  - a colored codel in which case we step one square into it and stop
-        if let Some((next_location, next_color)) =
-            self.program.next_point(second_edge, self.state.direction)
-        {
-            match next_color {
-                Color::Black => None,
-                Color::White => {
-                    // Find the first edge of the white region ignoring any potential further, disjoint ones
-                    let white_edge = self.next_edge(next_location, self.state.direction);
-                    // If we're about to step into a Color::Color codel, do it; otherwise, stop at the edge
-                    match self.program.next_point(white_edge, self.state.direction) {
-                        Some((point, color @ Color { .. })) => Some((point, color, true)),
-                        _ => Some((white_edge, &Color::White, true)),
+        self.program
+            .next_point(second_edge, self.state.direction)
+            .and_then(|(next_location, next_color)| {
+                match next_color {
+                    Color::Black => None,
+                    Color::White => {
+                        // Find the first edge of the white region ignoring any potential further, disjoint ones
+                        let white_edge = self.next_edge(next_location, self.state.direction);
+                        // If we're about to step into a Color::Color codel, do it; otherwise, stop at the edge
+                        match self.program.next_point(white_edge, self.state.direction) {
+                            Some((point, color @ Color::Color { .. })) => {
+                                Some((point, color, true))
+                            }
+                            _ => Some((white_edge, &Color::White, true)),
+                        }
                     }
+                    color @ Color::Color { .. } => Some((next_location, color, false)),
                 }
-                color @ Color::Color { .. } => Some((next_location, color, false)),
-            }
-        } else {
-            None
-        }
+            })
     }
 
     /// The coordinate of the closest region edge (exclusive) reached starting from `start` and moving in `direction`.

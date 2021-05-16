@@ -82,7 +82,7 @@ impl Program {
     fn get_region(colors: &[Vec<Color>], point: (usize, usize)) -> Region {
         let mut members = HashSet::new();
         let mut neighbors = vec![point];
-        let mut seen = neighbors.into_iter().collect();
+        let mut seen: HashSet<(usize, usize)> = neighbors.clone().into_iter().collect();
 
         let (row, col) = point;
         let color = &colors[row][col];
