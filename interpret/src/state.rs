@@ -33,4 +33,16 @@ impl State {
             stdin: stdin.into_iter().rev().collect(),
         }
     }
+
+    /// When there's a collision with the edge of the program or a black codel, advance the direction/chooser.
+    /// For even attempts, advance the chooser direction.
+    /// For odd attempts, alternate the pointer direction.
+    pub fn collide(&mut self) {
+        if self.termination_counter % 2 == 0 {
+            self.chooser = self.chooser.next();
+        } else {
+            self.direction = self.direction.next();
+        }
+        self.termination_counter += 1;
+    }
 }

@@ -56,13 +56,7 @@ impl Interpreter {
             // Reset the termination counter if we've found a path forwards
             self.state.termination_counter = 0;
         } else {
-            // For even attempts, advance the chooser direction; otherwise alternate the pointer direction
-            if self.state.termination_counter % 2 == 0 {
-                self.state.chooser = self.state.chooser.next();
-            } else {
-                self.state.direction = self.state.direction.next();
-            }
-            self.state.termination_counter += 1;
+            self.state.collide();
         }
     }
 
