@@ -7,7 +7,7 @@ use image::GenericImageView;
 use itertools::Itertools;
 
 use crate::codel::Codel;
-use crate::direction::ProgramDirection;
+use crate::direction::Direction;
 use crate::point::Point;
 use crate::region::Region;
 
@@ -127,15 +127,15 @@ impl Program {
     }
 
     /// Gets the next codel along with its coordinates if one exists.
-    pub fn maybe_next_codel<T: Into<ProgramDirection>>(
+    pub fn maybe_next_codel<T: Into<Direction>>(
         &self,
         start: (usize, usize),
         direction: T,
     ) -> Option<((usize, usize), &Codel)> {
         let (row, col) = start;
         let maybe_next = match direction.into() {
-            ProgramDirection::Up => row.checked_sub(1).map(|next_row| (next_row, col)),
-            ProgramDirection::Down => {
+            Direction::Up => row.checked_sub(1).map(|next_row| (next_row, col)),
+            Direction::Down => {
                 let next_row = row + 1;
                 if next_row < self.rows {
                     Some((next_row, col))
@@ -143,8 +143,8 @@ impl Program {
                     None
                 }
             }
-            ProgramDirection::Left => col.checked_sub(1).map(|next_col| (row, next_col)),
-            ProgramDirection::Right => {
+            Direction::Left => col.checked_sub(1).map(|next_col| (row, next_col)),
+            Direction::Right => {
                 let next_col = col + 1;
                 if next_col < self.cols {
                     Some((row, next_col))
@@ -254,23 +254,14 @@ mod test_program {
         let program = Program::new(codels, 3, 3);
 
         // corners
-        assert_eq!(program.maybe_next_codel((0, 0), ProgramDirection::Up), None);
-        assert_eq!(
-            program.maybe_next_codel((0, 0), ProgramDirection::Left),
-            None
-        );
-        assert_eq!(
-            program.maybe_next_codel((2, 2), ProgramDirection::Right),
-            None
-        );
-        assert_eq!(
-            program.maybe_next_codel((2, 2), ProgramDirection::Down),
-            None
-        );
+        assert_eq!(program.maybe_next_codel((0, 0), Direction::Up), None);
+        assert_eq!(program.maybe_next_codel((0, 0), Direction::Left), None);
+        assert_eq!(program.maybe_next_codel((2, 2), Direction::Right), None);
+        assert_eq!(program.maybe_next_codel((2, 2), Direction::Down), None);
 
         // corners
         assert_eq!(
-            program.maybe_next_codel((1, 1), ProgramDirection::Up),
+            program.maybe_next_codel((1, 1), Direction::Up),
             Some((
                 (0, 1),
                 &Codel::Color {
@@ -280,7 +271,7 @@ mod test_program {
             ))
         );
         assert_eq!(
-            program.maybe_next_codel((1, 1), ProgramDirection::Left),
+            program.maybe_next_codel((1, 1), Direction::Left),
             Some((
                 (1, 0),
                 &Codel::Color {
@@ -290,7 +281,7 @@ mod test_program {
             ))
         );
         assert_eq!(
-            program.maybe_next_codel((1, 1), ProgramDirection::Right),
+            program.maybe_next_codel((1, 1), Direction::Right),
             Some((
                 (1, 2),
                 &Codel::Color {
@@ -300,7 +291,7 @@ mod test_program {
             ))
         );
         assert_eq!(
-            program.maybe_next_codel((1, 1), ProgramDirection::Down),
+            program.maybe_next_codel((1, 1), Direction::Down),
             Some((
                 (2, 1),
                 &Codel::Color {

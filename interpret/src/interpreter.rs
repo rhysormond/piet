@@ -2,8 +2,8 @@ use parse::codel::Codel;
 use parse::program::Program;
 
 use crate::command::execute;
-use crate::direction::PointerDirection;
 use crate::state::State;
+use parse::direction::Direction;
 
 /// An interpreter for a Piet program.
 ///
@@ -81,8 +81,8 @@ impl Interpreter {
         let second_edge = self.disjoint_edge_coordinate(
             first_edge,
             self.state
-                .pointer_direction
-                .with_chooser(self.state.chooser_direction),
+                .chooser_direction
+                .choose(self.state.pointer_direction),
         );
 
         // Check if we're moving into:
@@ -123,11 +123,7 @@ impl Interpreter {
     }
 
     /// The coordinate of the closest region edge (exclusive) reached starting from `start` and moving in `direction`.
-    fn edge_coordinate(
-        &self,
-        start: (usize, usize),
-        direction: PointerDirection,
-    ) -> (usize, usize) {
+    fn edge_coordinate(&self, start: (usize, usize), direction: Direction) -> (usize, usize) {
         let codel = self.program.codel_at(start);
         let mut pointer = start;
         let mut edge = false;
@@ -144,7 +140,7 @@ impl Interpreter {
     fn disjoint_edge_coordinate(
         &self,
         start: (usize, usize),
-        direction: PointerDirection,
+        direction: Direction,
     ) -> (usize, usize) {
         self.program.region_at(start).edge(start, direction.into())
     }
