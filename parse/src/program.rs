@@ -54,7 +54,7 @@ impl Program {
     }
 
     /// Builds a map of program coordinates to the sizes of their corresponding regions
-    fn get_points(codels: &Vec<Vec<Codel>>, rows: &usize, cols: &usize) -> Vec<Vec<Point>> {
+    fn get_points(codels: &[Vec<Codel>], rows: &usize, cols: &usize) -> Vec<Vec<Point>> {
         // Maps codel coordinates to the index of the region that they belong to
         let mut regions: HashMap<(usize, usize), Region> = HashMap::new();
 
@@ -81,7 +81,7 @@ impl Program {
     }
 
     /// Get all members of the same contiguous region of color
-    fn get_region(codels: &Vec<Vec<Codel>>, point: (usize, usize)) -> Region {
+    fn get_region(codels: &[Vec<Codel>], point: (usize, usize)) -> Region {
         let mut seen = HashSet::new();
         let mut members = HashSet::new();
         let mut neighbors = vec![point];

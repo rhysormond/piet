@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use crate::state::State;
 
-///	Selects a command based on the change in hue/lightness between two regions and executes it.
+/// Selects a command based on the change in hue/lightness between two regions and executes it.
 ///
 /// | hue/lightness change | 0    | 1        | 2      | 3       | 4         | 5          |
 /// |----------------------|------|----------|--------|---------|-----------|------------|
@@ -11,7 +11,7 @@ use crate::state::State;
 /// | 2                    | pop  | multiply | not    | switch  | in_number | out_char   |
 ///
 /// Any operations which cannot be performed (such as popping values when not enough are on the stack) are simply ignored, and processing continues with the next command.
-pub fn execute(state: &mut State, delta_hue: u8, delta_lightness: u8, current_region_size: usize) -> () {
+pub fn execute(state: &mut State, delta_hue: u8, delta_lightness: u8, current_region_size: usize) {
     match (delta_hue, delta_lightness) {
         (0, 0) => (),
         (0, 1) => push(state, current_region_size),
@@ -37,17 +37,17 @@ pub fn execute(state: &mut State, delta_hue: u8, delta_lightness: u8, current_re
 
 /// Pushes the value of the colour block just exited on to the stack.
 /// Note that values of colour blocks are not automatically pushed on to the stack - this push operation must be explicitly carried out.
-fn push(state: &mut State, current_region_size: usize) -> () {
+fn push(state: &mut State, current_region_size: usize) {
     state.stack.push(current_region_size as isize);
 }
 
 /// Pops the top value off the stack and discards it.
-fn pop(state: &mut State) -> () {
+fn pop(state: &mut State) {
     state.stack.pop();
 }
 
 /// Pops the top two values off the stack, adds them, and pushes the result back on the stack.
-fn add(state: &mut State) -> () {
+fn add(state: &mut State) {
     if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
@@ -56,7 +56,7 @@ fn add(state: &mut State) -> () {
 }
 
 /// Pops the top two values off the stack, calculates the second top value minus the top value, and pushes the result back on the stack.
-fn subtract(state: &mut State) -> () {
+fn subtract(state: &mut State) {
     if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
@@ -65,7 +65,7 @@ fn subtract(state: &mut State) -> () {
 }
 
 /// Pops the top two values off the stack, multiplies them, and pushes the result back on the stack.
-fn multiply(state: &mut State) -> () {
+fn multiply(state: &mut State) {
     if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
@@ -75,7 +75,7 @@ fn multiply(state: &mut State) -> () {
 
 /// Pops the top two values off the stack, calculates the integer division of the second top value by the top value, and pushes the result back on the stack.
 /// If a divide by zero occurs, it is handled as an implementation-dependent error, though simply ignoring the command is recommended.
-fn divide(state: &mut State) -> () {
+fn divide(state: &mut State) {
     if state.stack.len() >= 2 && state.stack.last().unwrap() != &0 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
@@ -86,7 +86,7 @@ fn divide(state: &mut State) -> () {
 /// Pops the top two values off the stack, calculates the second top value modulo the top value, and pushes the result back on the stack.
 /// The result has the same sign as the divisor (the top value).
 /// If the top value is zero, this is a divide by zero error, which is handled as an implementation-dependent error, though simply ignoring the command is recommended.
-fn modulo(state: &mut State) -> () {
+fn modulo(state: &mut State) {
     if state.stack.len() >= 2 && state.stack.last().unwrap() != &0 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
@@ -95,14 +95,14 @@ fn modulo(state: &mut State) -> () {
 }
 
 /// Replaces the top value of the stack with 0 if it is non-zero, and 1 if it is zero.
-fn not(state: &mut State) -> () {
+fn not(state: &mut State) {
     state.stack.pop().map(|top| {
         state.stack.push(if top == 0 { 1 } else { 0 });
     });
 }
 
 /// Pops the top two values off the stack, and pushes 1 on to the stack if the second top value is greater than the top value, and pushes 0 if it is not greater.
-fn greater(state: &mut State) -> () {
+fn greater(state: &mut State) {
     if state.stack.len() >= 2 {
         let one = state.stack.pop().unwrap();
         let two = state.stack.pop().unwrap();
@@ -111,7 +111,7 @@ fn greater(state: &mut State) -> () {
 }
 
 /// Pops the top value off the stack and rotates the DP clockwise that many steps (anticlockwise if negative).
-fn pointer(state: &mut State) -> () {
+fn pointer(state: &mut State) {
     state.stack.pop().map(|top| {
         let clockwise_steps = {
             let absolute_steps = top % 4;
@@ -128,7 +128,7 @@ fn pointer(state: &mut State) -> () {
 }
 
 /// Pops the top value off the stack and toggles the CC that many times (the absolute value of that many times if negative).
-fn switch(state: &mut State) -> () {
+fn switch(state: &mut State) {
     state.stack.pop().map(|top| {
         let steps = (top % 2).abs();
         for _ in 0..steps {
@@ -138,7 +138,7 @@ fn switch(state: &mut State) -> () {
 }
 
 /// Pushes a copy of the top value on the stack on to the stack.
-fn duplicate(state: &mut State) -> () {
+fn duplicate(state: &mut State) {
     state.stack.pop().map(|top| {
         state.stack.push(top);
         state.stack.push(top);
@@ -150,7 +150,7 @@ fn duplicate(state: &mut State) -> () {
 /// A negative number of rolls rolls in the opposite direction.
 /// A negative depth is an error and the command is ignored.
 /// If a roll is greater than an implementation-dependent maximum stack depth, it is handled as an implementation-dependent error, though simply ignoring the command is recommended.
-fn roll(state: &mut State) -> () {
+fn roll(state: &mut State) {
     let stack_size = state.stack.len();
     let maybe_final_stack_size = stack_size.checked_sub(2);
 
@@ -189,7 +189,7 @@ fn roll(state: &mut State) -> () {
 /// Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack.
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
-fn in_number(state: &mut State) -> () {
+fn in_number(state: &mut State) {
     state
         .stdin
         .pop()
@@ -200,7 +200,7 @@ fn in_number(state: &mut State) -> () {
 /// Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack.
 /// If no input is waiting on STDIN, this is an error and the command is ignored.
 /// If an integer read does not receive an integer value, this is an error and the command is ignored.
-fn in_char(state: &mut State) -> () {
+fn in_char(state: &mut State) {
     state
         .stdin
         .pop()
@@ -208,7 +208,7 @@ fn in_char(state: &mut State) -> () {
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
-fn out_number(state: &mut State) -> () {
+fn out_number(state: &mut State) {
     state
         .stack
         .pop()
@@ -216,12 +216,12 @@ fn out_number(state: &mut State) -> () {
 }
 
 /// Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.
-fn out_char(state: &mut State) -> () {
+fn out_char(state: &mut State) {
     state
         .stack
         .pop()
         .and_then(|top| u32::try_from(top).ok())
-        .and_then(|top| std::char::from_u32(top))
+        .and_then(std::char::from_u32)
         .map(|char| print!("{}", char));
 }
 

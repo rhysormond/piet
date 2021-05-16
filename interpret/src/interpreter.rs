@@ -26,14 +26,14 @@ impl Interpreter {
     }
 
     /// Runs the interpreter until completion.
-    pub fn run(&mut self) -> () {
+    pub fn run(&mut self) {
         while self.state.termination_counter < 8 {
             self.advance();
         }
     }
 
     /// Advance the program state by one iteration.
-    fn advance(&mut self) -> () {
+    fn advance(&mut self) {
         if let Some((next_location, next_codel, passed_white)) = self.next_coordinates() {
             // If this is a region that we can move into, do it!
             let (delta_hue, delta_lightness) = {
@@ -76,7 +76,7 @@ impl Interpreter {
     ///  - whether a white region was traversed
     /// TODO: the return type can be strengthened to Codel::Color without too much work
     fn next_coordinates(&self) -> Option<((usize, usize), &Codel, bool)> {
-        let first_edge = self.disjoint_edge_coordinate(self.state.pointer_location.clone(), self.state.pointer_direction);
+        let first_edge = self.disjoint_edge_coordinate(self.state.pointer_location, self.state.pointer_direction);
         let second_edge = self.disjoint_edge_coordinate(first_edge, self.state.pointer_direction.with_chooser(self.state.chooser_direction));
 
         // Check if we're moving into:
@@ -112,7 +112,7 @@ impl Interpreter {
         let codel = self.program.codel_at(start);
         let mut pointer = start;
         let mut edge = false;
-        while edge == false {
+        while !edge {
             match self.program.maybe_next_codel(pointer, direction) {
                 Some((next_pointer, next_codel)) if next_codel == codel => {
                     pointer = next_pointer
