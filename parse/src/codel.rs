@@ -24,7 +24,7 @@ const LIGHTNESS_CYCLE_SIZE: u8 = 3;
 /// - light -> neutral -> dark -> light
 /// Which is represented internally as:
 /// - 0 -> 1 -> 2 -> 0
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Codel {
     Color { hue: u8, lightness: u8 },
     Black,

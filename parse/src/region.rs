@@ -4,14 +4,18 @@ use itertools::Itertools;
 
 use crate::direction::ProgramDirection;
 
-struct Region {
-    members: HashSet<(usize, usize)>,
+#[derive(Debug, Clone, PartialEq)]
+pub struct Region {
+    pub(crate) members: HashSet<(usize, usize)>,
+    pub size: usize,
 }
 
 impl Region {
     pub fn new(members: HashSet<(usize, usize)>) -> Region {
+        let size = members.len();
         Region {
             members,
+            size,
         }
     }
 

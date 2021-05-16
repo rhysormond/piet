@@ -8,30 +8,29 @@ use itertools::Itertools;
 
 use crate::codel::Codel;
 use crate::direction::ProgramDirection;
+use crate::point::Point;
+use crate::region::Region;
 
 /// A Piet program is represented as a 2d grid of Codels.
 ///
 /// # Parameters
 ///
-/// * `codels` - A collection of rows of Codels where `codels[0][0]` represents the top-left Codel.
-/// * `regions` - A map of coordinates to the size of their corresponding regions.
+/// * `points` - A collection of rows of Codels and their corresponding Regions where `points[0][0]` represents the top-left point.
 /// * `rows` - The number of rows in the program.
 /// * `cols` - The number of cols in the program.
 #[derive(Debug)]
 pub struct Program {
-    pub codels: Vec<Vec<Codel>>,
-    pub regions: HashMap<(usize, usize), usize>,
+    pub points: Vec<Vec<Point>>,
     rows: usize,
     cols: usize,
 }
 
 impl Program {
     pub fn new(codels: Vec<Vec<Codel>>, rows: usize, cols: usize) -> Program {
-        let regions = Self::get_regions(&codels, &rows, &cols);
+        let points = Self::get_points(&codels, &rows, &cols);
 
         Program {
-            regions,
-            codels,
+            points,
             rows,
             cols,
         }
@@ -55,26 +54,32 @@ impl Program {
     }
 
     /// Builds a map of program coordinates to the sizes of their corresponding regions
-    fn get_regions(codels: &Vec<Vec<Codel>>, rows: &usize, cols: &usize) -> HashMap<(usize, usize), usize> {
-        // Maps codel coordinates to the index of the size of the region that they belong to
-        let mut regions = HashMap::new();
-        for row in 0..*rows {
-            for col in 0..*cols {
+    fn get_points(codels: &Vec<Vec<Codel>>, rows: &usize, cols: &usize) -> Vec<Vec<Point>> {
+        // Maps codel coordinates to the index of the region that they belong to
+        let mut regions: HashMap<(usize, usize), Region> = HashMap::new();
+
+        // TODO: there's a lot of gross cloning to get rid of here
+        (0..*rows)
+            .map(|row| {(0..*cols).map(|col| {
+                let location = (row, col);
+                let codel = codels[row][col].clone();
                 // Build a region if the codel hasn't been seen before
-                if !regions.contains_key(&(row, col)) {
-                    let members = Self::get_region(codels, (row, col));
-                    let count = members.len();
-                    for point in members {
-                        regions.insert(point, count);
+                let region = if let Some(region) =  regions.get(&location) {
+                    region.clone()
+                } else {
+                    let region = Self::get_region(codels, location);
+                    for member in &region.members {
+                        regions.insert(*member, region.clone());
                     }
-                }
-            }
-        }
-        regions
+                   region
+                };
+                Point {codel , region}
+            }).collect()})
+            .collect()
     }
 
     /// Get all members of the same contiguous region of color
-    fn get_region(codels: &Vec<Vec<Codel>>, point: (usize, usize)) -> HashSet<(usize, usize)> {
+    fn get_region(codels: &Vec<Vec<Codel>>, point: (usize, usize)) -> Region {
         let mut seen = HashSet::new();
         let mut members = HashSet::new();
         let mut neighbors = vec![point];
@@ -103,7 +108,7 @@ impl Program {
             }
         }
 
-        members
+        Region::new(members)
     }
 
     /// Get all the neighbors of a given point
@@ -154,7 +159,13 @@ impl Program {
     /// Gets the codel at the specified (row, column) point.
     pub fn codel_at(&self, point: (usize, usize)) -> &Codel {
         let (row, col) = point;
-        &self.codels[row][col]
+        &self.points[row][col].codel
+    }
+
+    /// Gets the region at the specified (row, column) point.
+    pub fn region_at(&self, point: (usize, usize)) -> &Region {
+        let (row, col) = point;
+        &self.points[row][col].region
     }
 }
 
@@ -165,17 +176,21 @@ mod test_program {
     #[test]
     fn test_regions() {
         let codels = vec![
-            vec![Codel::White, Codel::White, Codel::Black],
-            vec![Codel::White, Codel::Black, Codel::Black],
-            vec![Codel::White, Codel::Black, Codel::Black],
+            vec![Codel::White, Codel::White],
+            vec![Codel::White, Codel::Black],
         ];
-        let program = Program::new(codels, 3, 3);
+        let program = Program::new(codels, 2, 2);
         let expected = vec![
-            ((0, 0), 4), ((0, 1), 4), ((0, 2), 5),
-            ((1, 0), 4), ((1, 1), 5), ((1, 2), 5),
-            ((2, 0), 4), ((2, 1), 5), ((2, 2), 5),
+            vec![
+                Point { codel: Codel::White, region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()) },
+                Point { codel: Codel::White, region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()) }
+            ],
+            vec![
+                Point { codel: Codel::White, region: Region::new(vec![(0, 0), (0, 1), (1, 0)].into_iter().collect()) },
+                Point { codel: Codel::Black, region: Region::new(vec![(1, 1)].into_iter().collect()) }
+            ],
         ];
-        assert_eq!(program.regions, expected.into_iter().collect());
+        assert_eq!(program.points, expected);
     }
 
     #[test]
@@ -208,5 +223,15 @@ mod test_program {
         ];
         let program = Program::new(codels, 2, 2);
         assert_eq!(program.codel_at((1, 1)), &Codel::Black);
+    }
+
+    #[test]
+    fn test_region_at() {
+        let codels = vec![
+            vec![Codel::White, Codel::White],
+            vec![Codel::White, Codel::Black]
+        ];
+        let program = Program::new(codels, 2, 2);
+        assert_eq!(program.region_at((1, 1)), &Region { members: vec![(1, 1)].into_iter().collect(), size: 1 });
     }
 }

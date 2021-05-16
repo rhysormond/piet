@@ -46,7 +46,7 @@ impl Interpreter {
                     current_codel.compare(&next_codel).unwrap()
                 }
             };
-            let current_region_size = *self.program.regions.get(&self.state.pointer_location).unwrap();
+            let current_region_size = self.program.region_at(self.state.pointer_location).size;
             execute(
                 &mut self.state,
                 delta_hue,
