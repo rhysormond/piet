@@ -76,9 +76,9 @@ impl Interpreter {
     ///  - whether a white region was traversed
     /// TODO: the return type can be strengthened to Color::Color without too much work
     fn next_coordinates(&self) -> Option<((usize, usize), &Color, bool)> {
-        let first_edge = self.disjoint_edge_coordinate(self.state.pointer, self.state.direction);
-        let second_edge = self
-            .disjoint_edge_coordinate(first_edge, self.state.chooser.choose(self.state.direction));
+        let first_edge = self.next_disjoint_edge(self.state.pointer, self.state.direction);
+        let second_edge =
+            self.next_disjoint_edge(first_edge, self.state.chooser.choose(self.state.direction));
 
         // Check if we're moving into:
         //  - either the edge of the program or a black codel in which case we stop
@@ -94,7 +94,7 @@ impl Interpreter {
                 Color::Black => None,
                 Color::White => {
                     // Find the edge of the white region
-                    let white_edge = self.edge_coordinate(next_location, self.state.direction);
+                    let white_edge = self.next_edge(next_location, self.state.direction);
                     // If we're about to step into a colored codel, do it; otherwise, stop at the edge
                     match self
                         .program
@@ -117,25 +117,19 @@ impl Interpreter {
     }
 
     /// The coordinate of the closest region edge (exclusive) reached starting from `start` and moving in `direction`.
-    fn edge_coordinate(&self, start: (usize, usize), direction: Direction) -> (usize, usize) {
+    fn next_edge(&self, start: (usize, usize), direction: Direction) -> (usize, usize) {
         let color = self.program.color_at(start);
         let mut pointer = start;
-        let mut edge = false;
-        while !edge {
+        loop {
             match self.program.maybe_next_point(pointer, direction) {
                 Some((next_pointer, next_color)) if next_color == color => pointer = next_pointer,
-                _ => edge = true,
+                _ => break pointer,
             }
         }
-        pointer
     }
 
     /// The coordinate of the farthest region edge (exclusive) reached starting from `start` and moving in `direction`.
-    fn disjoint_edge_coordinate(
-        &self,
-        start: (usize, usize),
-        direction: Direction,
-    ) -> (usize, usize) {
+    fn next_disjoint_edge(&self, start: (usize, usize), direction: Direction) -> (usize, usize) {
         self.program.region_at(start).edge(start, direction.into())
     }
 }
